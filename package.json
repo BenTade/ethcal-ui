@@ -1,0 +1,52 @@
+{
+  "name": "ethcal-ui",
+  "version": "1.0.0",
+  "description": "Ethiopian Calendar UI component for JavaScript frameworks and PHP projects",
+  "type": "module",
+  "main": "dist/ethcal-ui.cjs.js",
+  "module": "dist/ethcal-ui.esm.js",
+  "browser": "dist/ethcal-ui.umd.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "php",
+    "examples"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BenTade/ethcal-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BenTade/ethcal-ui/issues"
+  },
+  "homepage": "https://github.com/BenTade/ethcal-ui#readme",
+  "keywords": [
+    "ethiopian",
+    "calendar",
+    "date",
+    "datepicker",
+    "ui",
+    "popup",
+    "ethiopia",
+    "ethiopian-calendar",
+    "date-picker",
+    "react",
+    "vue",
+    "angular",
+    "php"
+  ],
+  "author": "BenTade",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.9.6",
+    "rollup-plugin-css-only": "^4.5.2",
+    "rollup-plugin-postcss": "^4.0.2"
+  }
+}
