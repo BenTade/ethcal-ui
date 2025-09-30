@@ -1,0 +1,21 @@
+{
+    "name": "bentade/ethcal-ui",
+    "description": "Ethiopian Calendar UI component for JavaScript frameworks and PHP projects",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "BenTade"
+        }
+    ],
+    "require": {
+        "php": ">=7.3",
+        "andegna/calender": "^2.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "BenTade\\EthCal\\": "php/"
+        }
+    },
+    "minimum-stability": "stable"
+}

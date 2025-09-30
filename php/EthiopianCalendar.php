@@ -5,7 +5,15 @@
  * 
  * This is a companion class to the JavaScript UI component
  * for server-side date handling in PHP applications.
+ * 
+ * This implementation uses the andegna/calender package for accurate
+ * Ethiopian calendar calculations.
  */
+
+// Check if composer autoload exists
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+}
 
 class EthiopianCalendar {
     
@@ -15,18 +23,6 @@ class EthiopianCalendar {
     ];
     
     private $dayNames = ['Ehud', 'Segno', 'Maksegno', 'Erob', 'Hamus', 'Arb', 'Kidame'];
-
-    /**
-     * Helper function to calculate Ethiopian new year day
-     * 
-     * @param int $year Ethiopian year
-     * @return int New year day
-     */
-    private function startDayOfEthiopian($year) {
-        $newYearDay = floor($year / 100) - floor($year / 400) - 4;
-        // if the prev ethiopian year is a leap year, new-year occurs on 12th
-        return (($year - 1) % 4 === 3) ? $newYearDay + 1 : $newYearDay;
-    }
 
     /**
      * Convert Gregorian date to Ethiopian date
@@ -39,6 +35,27 @@ class EthiopianCalendar {
             $gregorianDate = new DateTime($gregorianDate);
         }
         
+        // Use andegna/calender for conversion if available
+        if (class_exists('Andegna\DateTime')) {
+            $ethiopic = new Andegna\DateTime($gregorianDate);
+            return [
+                'year' => $ethiopic->getYear(),
+                'month' => $ethiopic->getMonth(),
+                'day' => $ethiopic->getDay()
+            ];
+        }
+        
+        // Fallback to original implementation if andegna/calender is not available
+        return $this->toEthiopianFallback($gregorianDate);
+    }
+
+    /**
+     * Fallback conversion method (original implementation)
+     * 
+     * @param DateTime $gregorianDate DateTime object
+     * @return array Ethiopian date ['year' => int, 'month' => int, 'day' => int]
+     */
+    private function toEthiopianFallback($gregorianDate) {
         $year = (int)$gregorianDate->format('Y');
         $month = (int)$gregorianDate->format('m');
         $date = (int)$gregorianDate->format('d');
@@ -67,8 +84,11 @@ class EthiopianCalendar {
             $ethiopianMonths[10] = 6;
         }
         
-        // Ethiopian new year in Gregorian calendar
-        $newYearDay = $this->startDayOfEthiopian($year - 8);
+        // Helper function for Ethiopian new year day
+        $newYearDay = floor(($year - 8) / 100) - floor(($year - 8) / 400) - 4;
+        if ((($year - 8 - 1) % 4 === 3)) {
+            $newYearDay += 1;
+        }
         
         // calculate number of days up to that date
         $until = 0;
@@ -128,8 +148,35 @@ class EthiopianCalendar {
      * @return DateTime Gregorian DateTime object
      */
     public function toGregorian($year, $month, $day) {
-        // Ethiopian new year in Gregorian calendar
-        $newYearDay = $this->startDayOfEthiopian($year);
+        // Use andegna/calender for conversion if available
+        if (class_exists('Andegna\DateTimeFactory')) {
+            try {
+                $ethiopic = Andegna\DateTimeFactory::of($year, $month, $day);
+                return $ethiopic->toGregorian();
+            } catch (Exception $e) {
+                // If andegna fails (e.g., invalid date), use fallback
+                return $this->toGregorianFallback($year, $month, $day);
+            }
+        }
+        
+        // Fallback to original implementation if andegna/calender is not available
+        return $this->toGregorianFallback($year, $month, $day);
+    }
+
+    /**
+     * Fallback conversion method (original implementation)
+     * 
+     * @param int $year Ethiopian year
+     * @param int $month Ethiopian month (1-13)
+     * @param int $day Ethiopian day
+     * @return DateTime Gregorian DateTime object
+     */
+    private function toGregorianFallback($year, $month, $day) {
+        // Helper function for Ethiopian new year day
+        $newYearDay = floor($year / 100) - floor($year / 400) - 4;
+        if ((($year - 1) % 4 === 3)) {
+            $newYearDay += 1;
+        }
         
         // September (Ethiopian) sees 7y difference
         $gregorianYear = $year + 7;
