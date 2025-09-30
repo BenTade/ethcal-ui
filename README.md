@@ -8,6 +8,7 @@ Ethiopian Calendar UI component - A beautiful, easy-to-use calendar popup for se
 - 🎨 Beautiful, responsive popup UI
 - 📱 Mobile-friendly
 - 🔄 Automatic conversion between Ethiopian and Gregorian calendars
+- 🔀 **NEW: Merged calendar view** - Display both calendars in one grid with primary/secondary classification
 - 🚀 Works with vanilla JS, React, Vue, Angular, and PHP
 - 📦 Multiple module formats (ESM, CommonJS, UMD)
 - 🎯 Zero dependencies
@@ -242,11 +243,33 @@ Constructor options:
 
 ```javascript
 new EthiopianCalendarUI({
-  inputElement: HTMLElement,  // Optional: input element to bind to
-  initialDate: Date,          // Optional: initial date (default: today)
-  onSelect: function(date)    // Optional: callback when date is selected
+  inputElement: HTMLElement,      // Optional: input element to bind to
+  initialDate: Date,              // Optional: initial date (default: today)
+  onSelect: function(date),       // Optional: callback when date is selected
+  showGregorian: boolean,         // Optional: show Gregorian calendar (default: true)
+  useAmharic: boolean,            // Optional: use Amharic names (default: true)
+  useEthiopicNumbers: boolean,    // Optional: use Ethiopic numerals (default: false)
+  mergedView: boolean,            // Optional: enable merged calendar view (default: false)
+  primaryCalendar: string         // Optional: 'ethiopian' or 'gregorian' (default: 'ethiopian')
 })
 ```
+
+### Merged Calendar View
+
+The merged view displays both Ethiopian and Gregorian dates in a single calendar grid:
+
+```javascript
+const calendar = new EthiopianCalendarUI({
+  mergedView: true,
+  primaryCalendar: 'ethiopian',  // Primary dates displayed prominently
+  onSelect: (date) => {
+    console.log('Ethiopian:', date.ethiopian);
+    console.log('Gregorian:', date.gregorian);
+  }
+});
+```
+
+See [MERGED_CALENDAR.md](MERGED_CALENDAR.md) for detailed usage guide.
 
 Methods:
 
@@ -304,6 +327,7 @@ const today = calendar.now();
 Check the `examples` folder for complete working examples:
 
 - `examples/vanilla.html` - Vanilla JavaScript examples
+- `examples/merged-calendar.html` - **NEW: Merged calendar view examples**
 - `examples/react-component.jsx` - React component
 - `examples/php-form.php` - PHP form integration
 
@@ -320,6 +344,11 @@ The calendar comes with default styling, but you can customize it by overriding 
 .ethcal-today-highlight { /* Today's date */ }
 .ethcal-selected { /* Selected date */ }
 .ethcal-footer { /* Footer with buttons */ }
+
+/* Merged calendar specific */
+.ethcal-merged-day { /* Merged calendar day cell */ }
+.ethcal-primary-date { /* Primary date (large, prominent) */ }
+.ethcal-secondary-date { /* Secondary date (small, corner) */ }
 ```
 
 ## Browser Support
