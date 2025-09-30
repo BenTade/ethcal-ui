@@ -195,23 +195,42 @@ class EthiopianCalendarUI {
     const { year, month } = this.currentEthDate;
     
     // Update calendar header
-    this.popup.querySelector('.ethcal-month-name').textContent = 
-      this.calendar.getMonthName(month, this.options.useAmharic);
-    const yearText = this.options.useEthiopicNumbers 
-      ? this.calendar.toEthiopicNumeral(year)
-      : year;
-    this.popup.querySelector('.ethcal-year').textContent = yearText;
-    
-    // Update title for merged view
     if (this.options.mergedView) {
       const isPrimaryEthiopian = this.options.primaryCalendar === 'ethiopian';
+      
+      if (isPrimaryEthiopian) {
+        // Ethiopian is primary - use Amharic names and Ethiopian month
+        this.popup.querySelector('.ethcal-month-name').textContent = 
+          this.calendar.getMonthName(month, true);
+        // Year is always in Arabic numerals
+        this.popup.querySelector('.ethcal-year').textContent = year;
+      } else {
+        // Gregorian is primary - use English names and Gregorian month
+        const gregDate = this.calendar.toGregorian(year, month, 1);
+        const gregYear = gregDate.getFullYear();
+        const gregMonth = gregDate.getMonth();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+        this.popup.querySelector('.ethcal-month-name').textContent = monthNames[gregMonth];
+        // Year is always in Arabic numerals
+        this.popup.querySelector('.ethcal-year').textContent = gregYear;
+      }
+      
       const titleElement = this.popup.querySelector('.ethcal-calendar-title');
       if (titleElement) {
         titleElement.textContent = `${isPrimaryEthiopian ? 'Ethiopian' : 'Gregorian'} Calendar (Primary)`;
       }
+    } else {
+      // Non-merged view - use the useAmharic option
+      this.popup.querySelector('.ethcal-month-name').textContent = 
+        this.calendar.getMonthName(month, this.options.useAmharic);
+      const yearText = this.options.useEthiopicNumbers 
+        ? this.calendar.toEthiopicNumeral(year)
+        : year;
+      this.popup.querySelector('.ethcal-year').textContent = yearText;
     }
     
-    // Update weekday names based on useAmharic option
+    // Update weekday names based on primary calendar or useAmharic option
     this.updateWeekdayNames();
     
     // Render appropriate calendar view
@@ -235,7 +254,13 @@ class EthiopianCalendarUI {
     const selector = this.options.mergedView ? '.ethcal-merged-calendar .ethcal-weekdays' : '.ethcal-ethiopian .ethcal-weekdays';
     const weekdaysContainer = this.popup.querySelector(selector);
     if (weekdaysContainer) {
-      if (this.options.useAmharic) {
+      // In merged view, use primary calendar's language
+      // In non-merged view, use the useAmharic option
+      const useAmharic = this.options.mergedView 
+        ? (this.options.primaryCalendar === 'ethiopian')
+        : this.options.useAmharic;
+      
+      if (useAmharic) {
         weekdaysContainer.innerHTML = '<div>እሁድ</div><div>ሰኞ</div><div>ማክሰኞ</div><div>ረቡዕ</div><div>ሐሙስ</div><div>ዓርብ</div><div>ቅዳሜ</div>';
       } else {
         weekdaysContainer.innerHTML = '<div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>';
@@ -383,12 +408,10 @@ class EthiopianCalendarUI {
         const dayCell = document.createElement('div');
         dayCell.className = 'ethcal-day ethcal-merged-day';
         
-        // Primary date (Ethiopian)
-        const primaryText = this.options.useEthiopicNumbers 
-          ? this.calendar.toEthiopicNumeral(day)
-          : day;
+        // Primary date (Ethiopian) - always use Arabic numerals
+        const primaryText = day;
         
-        // Secondary date (Gregorian)
+        // Secondary date (Gregorian) - always use Arabic numerals
         const gregDate = this.calendar.toGregorian(year, month, day);
         const secondaryText = gregDate.getDate();
         
@@ -441,15 +464,13 @@ class EthiopianCalendarUI {
         const dayCell = document.createElement('div');
         dayCell.className = 'ethcal-day ethcal-merged-day';
         
-        // Primary date (Gregorian)
+        // Primary date (Gregorian) - always use Arabic numerals
         const primaryText = d;
         
-        // Secondary date (Ethiopian)
+        // Secondary date (Ethiopian) - always use Arabic numerals
         const currentGreg = new Date(gregYear, gregMonth, d);
         const ethDate = this.calendar.toEthiopian(currentGreg);
-        const secondaryText = this.options.useEthiopicNumbers 
-          ? this.calendar.toEthiopicNumeral(ethDate.day)
-          : ethDate.day;
+        const secondaryText = ethDate.day;
         
         dayCell.innerHTML = `
           <span class="ethcal-primary-date">${primaryText}</span>
