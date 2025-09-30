@@ -17,6 +17,18 @@ class EthiopianCalendar {
     private $dayNames = ['Ehud', 'Segno', 'Maksegno', 'Erob', 'Hamus', 'Arb', 'Kidame'];
 
     /**
+     * Helper function to calculate Ethiopian new year day
+     * 
+     * @param int $year Ethiopian year
+     * @return int New year day
+     */
+    private function startDayOfEthiopian($year) {
+        $newYearDay = floor($year / 100) - floor($year / 400) - 4;
+        // if the prev ethiopian year is a leap year, new-year occurs on 12th
+        return (($year - 1) % 4 === 3) ? $newYearDay + 1 : $newYearDay;
+    }
+
+    /**
      * Convert Gregorian date to Ethiopian date
      * 
      * @param DateTime|string $gregorianDate DateTime object or date string
@@ -29,29 +41,81 @@ class EthiopianCalendar {
         
         $year = (int)$gregorianDate->format('Y');
         $month = (int)$gregorianDate->format('m');
-        $day = (int)$gregorianDate->format('d');
+        $date = (int)$gregorianDate->format('d');
         
-        // JDN (Julian Day Number) calculation
-        $a = floor((14 - $month) / 12);
-        $y = $year + 4800 - $a;
-        $m = $month + 12 * $a - 3;
+        // Validate input
+        if ($month === 10 && $date >= 5 && $date <= 14 && $year === 1582) {
+            throw new Exception('Invalid Date between 5-14 May 1582.');
+        }
         
-        $jdn = $day + floor((153 * $m + 2) / 5) + 365 * $y + 
-               floor($y / 4) - floor($y / 100) + 
-               floor($y / 400) - 32045;
+        // Number of days in gregorian months starting with January (index 1)
+        $gregorianMonths = [0.0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         
-        // Convert JDN to Ethiopian
-        $r = ($jdn - 1723856) % 1461;
-        $n = ($r % 365) + 365 * floor($r / 1460);
+        // Number of days in ethiopian months starting with January (index 1)
+        $ethiopianMonths = [0.0, 30, 30, 30, 30, 30, 30, 30, 30, 30, 5, 30, 30, 30, 30];
         
-        $ethYear = floor(($jdn - 1723856) / 1461) + 1;
-        $ethMonth = floor($n / 30) + 1;
-        $ethDay = ($n % 30) + 1;
+        // if gregorian leap year, February has 29 days
+        if (($year % 4 === 0 && $year % 100 !== 0) || $year % 400 === 0) {
+            $gregorianMonths[2] = 29;
+        }
+        
+        // September sees 8y difference
+        $ethiopianYear = $year - 8;
+        
+        // if ethiopian leap year pagumain has 6 days
+        if ($ethiopianYear % 4 === 3) {
+            $ethiopianMonths[10] = 6;
+        }
+        
+        // Ethiopian new year in Gregorian calendar
+        $newYearDay = $this->startDayOfEthiopian($year - 8);
+        
+        // calculate number of days up to that date
+        $until = 0;
+        for ($i = 1; $i < $month; $i++) {
+            $until += $gregorianMonths[$i];
+        }
+        $until += $date;
+        
+        // update tahissas (december) to match january 1st
+        $tahissas = ($ethiopianYear % 4) === 0 ? 26 : 25;
+        
+        // take into account the 1582 change
+        if ($year < 1582) {
+            $ethiopianMonths[1] = 0;
+            $ethiopianMonths[2] = $tahissas;
+        } else if ($until <= 277 && $year === 1582) {
+            $ethiopianMonths[1] = 0;
+            $ethiopianMonths[2] = $tahissas;
+        } else {
+            $tahissas = $newYearDay - 3;
+            $ethiopianMonths[1] = $tahissas;
+        }
+        
+        // calculate month and date incremently
+        $ethiopianDate = 0;
+        for ($m = 1; $m < count($ethiopianMonths); $m++) {
+            if ($until <= $ethiopianMonths[$m]) {
+                $ethiopianDate = ($m === 1 || $ethiopianMonths[$m] === 0) ? $until + (30 - $tahissas) : $until;
+                break;
+            } else {
+                $until -= $ethiopianMonths[$m];
+            }
+        }
+        
+        // if m > 10, we're already on next Ethiopian year
+        if ($m > 10) {
+            $ethiopianYear += 1;
+        }
+        
+        // Ethiopian months ordered according to Gregorian
+        $order = [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 2, 3, 4];
+        $ethiopianMonth = $order[$m];
         
         return [
-            'year' => $ethYear,
-            'month' => $ethMonth,
-            'day' => $ethDay
+            'year' => $ethiopianYear,
+            'month' => $ethiopianMonth,
+            'day' => $ethiopianDate
         ];
     }
 
@@ -64,22 +128,62 @@ class EthiopianCalendar {
      * @return DateTime Gregorian DateTime object
      */
     public function toGregorian($year, $month, $day) {
-        // Calculate JDN from Ethiopian date
-        $jdn = ($year - 1) * 1461 / 4 + ($month - 1) * 30 + $day + 1723856;
+        // Ethiopian new year in Gregorian calendar
+        $newYearDay = $this->startDayOfEthiopian($year);
         
-        // Convert JDN to Gregorian
-        $a = $jdn + 32044;
-        $b = floor((4 * $a + 3) / 146097);
-        $c = $a - floor(146097 * $b / 4);
-        $d = floor((4 * $c + 3) / 1461);
-        $e = $c - floor(1461 * $d / 4);
-        $m = floor((5 * $e + 2) / 153);
+        // September (Ethiopian) sees 7y difference
+        $gregorianYear = $year + 7;
         
-        $gregDay = $e - floor((153 * $m + 2) / 5) + 1;
-        $gregMonth = $m + 3 - 12 * floor($m / 10);
-        $gregYear = 100 * $b + $d - 4800 + floor($m / 10);
+        // Number of days in gregorian months
+        // starting with September (index 1)
+        // Index 0 is reserved for leap years switches.
+        // Index 4 is December, the final month of the year.
+        $gregorianMonths = [0.0, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30];
         
-        return new DateTime(sprintf('%04d-%02d-%02d', $gregYear, $gregMonth, $gregDay));
+        // if next gregorian year is leap year, February has 29 days.
+        $nextYear = $gregorianYear + 1;
+        if (($nextYear % 4 === 0 && $nextYear % 100 !== 0) || $nextYear % 400 === 0) {
+            $gregorianMonths[6] = 29;
+        }
+        
+        // calculate number of days up to that date
+        $until = (($month - 1) * 30.0) + $day;
+        if ($until <= 37 && $year <= 1575) { // mysterious rule
+            $until += 28;
+            $gregorianMonths[0] = 31;
+        } else {
+            $until += $newYearDay - 1;
+        }
+        
+        // if ethiopian year is leap year, paguemain has six days
+        if (($year - 1) % 4 === 3) {
+            $until += 1;
+        }
+        
+        // calculate month and date incremently
+        $m = 0;
+        $gregorianDate = 0;
+        for ($i = 0; $i < count($gregorianMonths); $i++) {
+            if ($until <= $gregorianMonths[$i]) {
+                $m = $i;
+                $gregorianDate = $until;
+                break;
+            } else {
+                $m = $i;
+                $until -= $gregorianMonths[$i];
+            }
+        }
+        
+        // if m > 4, we're already on next Gregorian year
+        if ($m > 4) {
+            $gregorianYear += 1;
+        }
+        
+        // Gregorian months ordered according to Ethiopian
+        $order = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        $gregorianMonth = $order[$m];
+        
+        return new DateTime(sprintf('%04d-%02d-%02d', $gregorianYear, $gregorianMonth, $gregorianDate));
     }
 
     /**
@@ -144,12 +248,28 @@ class EthiopianCalendar {
      * @return string Formatted date
      */
     public function format($ethDate, $format = 'd/m/y') {
-        $output = $format;
-        $output = str_replace('d', $ethDate['day'], $output);
-        $output = str_replace('M', $this->getMonthName($ethDate['month']), $output);
-        $output = str_replace('m', $ethDate['month'], $output);
-        $output = str_replace('y', $ethDate['year'], $output);
-        return $output;
+        // Use unique placeholders to avoid character conflicts
+        $replacements = [
+            'y' => $ethDate['year'],
+            'M' => $this->getMonthName($ethDate['month']),
+            'm' => str_pad($ethDate['month'], 2, '0', STR_PAD_LEFT),
+            'd' => str_pad($ethDate['day'], 2, '0', STR_PAD_LEFT),
+        ];
+        
+        // Create unique temporary placeholders
+        $temp = $format;
+        $temp = str_replace('M', '<<<MONTH_NAME>>>', $temp);
+        $temp = str_replace('y', '<<<YEAR>>>', $temp);
+        $temp = str_replace('m', '<<<MONTH_NUM>>>', $temp);
+        $temp = str_replace('d', '<<<DAY>>>', $temp);
+        
+        // Replace with actual values
+        $temp = str_replace('<<<MONTH_NAME>>>', $replacements['M'], $temp);
+        $temp = str_replace('<<<YEAR>>>', $replacements['y'], $temp);
+        $temp = str_replace('<<<MONTH_NUM>>>', $replacements['m'], $temp);
+        $temp = str_replace('<<<DAY>>>', $replacements['d'], $temp);
+        
+        return $temp;
     }
 }
 
