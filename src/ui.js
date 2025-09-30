@@ -87,10 +87,10 @@ class EthiopianCalendarUI {
             <input type="checkbox" class="ethcal-option-amharic" ${this.options.useAmharic ? 'checked' : ''}>
             <span>Use Amharic</span>
           </label>
-          ${isPrimaryEthiopian ? `<label>
+          <label>
             <input type="checkbox" class="ethcal-option-ethiopic" ${this.options.useEthiopicNumbers ? 'checked' : ''}>
             <span>Ethiopic Numbers</span>
-          </label>` : ''}
+          </label>
           <label>
             <input type="checkbox" class="ethcal-option-primary" ${isPrimaryEthiopian ? 'checked' : ''}>
             <span>Ethiopian Primary</span>
@@ -489,10 +489,12 @@ class EthiopianCalendarUI {
         // Primary date (Gregorian) - always use Arabic numerals
         const primaryText = d;
         
-        // Secondary date (Ethiopian) - always use Arabic numerals
+        // Secondary date (Ethiopian) - use Ethiopic numbers if enabled
         const currentGreg = new Date(gregYear, gregMonth, d);
         const ethDate = this.calendar.toEthiopian(currentGreg);
-        const secondaryText = ethDate.day;
+        const secondaryText = this.options.useEthiopicNumbers 
+          ? this.calendar.toEthiopicNumeral(ethDate.day)
+          : ethDate.day;
         
         dayCell.innerHTML = `
           <span class="ethcal-primary-date">${primaryText}</span>
@@ -555,7 +557,7 @@ class EthiopianCalendarUI {
     if (primaryToggle) {
       primaryToggle.addEventListener('change', (e) => {
         this.options.primaryCalendar = e.target.checked ? 'ethiopian' : 'gregorian';
-        // Recreate popup to show/hide Ethiopic Numbers checkbox
+        // Recreate popup to update button labels and calendar layout
         const oldPopup = this.popup;
         this.popup = this.createPopup();
         oldPopup.replaceWith(this.popup);
