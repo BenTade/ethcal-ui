@@ -10,13 +10,22 @@
   "files": [
     "dist",
     "src",
-    "php"
+    "php",
+    "examples"
   ],
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "prepare": "npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BenTade/ethcal-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BenTade/ethcal-ui/issues"
+  },
+  "homepage": "https://github.com/BenTade/ethcal-ui#readme",
   "keywords": [
     "ethiopian",
     "calendar",
@@ -24,9 +33,15 @@
     "datepicker",
     "ui",
     "popup",
-    "ethiopia"
+    "ethiopia",
+    "ethiopian-calendar",
+    "date-picker",
+    "react",
+    "vue",
+    "angular",
+    "php"
   ],
-  "author": "",
+  "author": "BenTade",
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
