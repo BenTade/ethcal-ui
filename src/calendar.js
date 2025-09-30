@@ -10,8 +10,15 @@ class EthiopianCalendar {
       'Meskerem', 'Tikimt', 'Hidar', 'Tahsas', 'Tir', 'Yekatit',
       'Megabit', 'Miazia', 'Ginbot', 'Sene', 'Hamle', 'Nehase', 'Pagume'
     ];
+
+    this.monthNamesAmharic = [
+      'መስከረም', 'ጥቅምት', 'ኅዳር', 'ታኅሣሥ', 'ጥር', 'የካቲት',
+      'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጳጉሜን'
+    ];
     
     this.dayNames = ['Ehud', 'Segno', 'Maksegno', 'Erob', 'Hamus', 'Arb', 'Kidame'];
+
+    this.dayNamesAmharic = ['እሁድ', 'ሰኞ', 'ማክሰኞ', 'ረቡዕ', 'ሐሙስ', 'ዓርብ', 'ቅዳሜ'];
   }
 
   /**
@@ -112,19 +119,62 @@ class EthiopianCalendar {
   /**
    * Get month name
    * @param {number} month - Ethiopian month (1-13)
+   * @param {boolean} useAmharic - Use Amharic names
    * @returns {string} Month name
    */
-  getMonthName(month) {
-    return this.monthNames[month - 1] || '';
+  getMonthName(month, useAmharic = false) {
+    const names = useAmharic ? this.monthNamesAmharic : this.monthNames;
+    return names[month - 1] || '';
   }
 
   /**
    * Get day name
    * @param {number} dayOfWeek - Day of week (0-6)
+   * @param {boolean} useAmharic - Use Amharic names
    * @returns {string} Day name
    */
-  getDayName(dayOfWeek) {
-    return this.dayNames[dayOfWeek] || '';
+  getDayName(dayOfWeek, useAmharic = false) {
+    const names = useAmharic ? this.dayNamesAmharic : this.dayNames;
+    return names[dayOfWeek] || '';
+  }
+
+  /**
+   * Convert Arabic numerals to Ethiopic numerals
+   * @param {number} num - Number to convert
+   * @returns {string} Ethiopic numeral representation
+   */
+  toEthiopicNumeral(num) {
+    if (num === 0) return '0';
+    
+    const ethiopicNumerals = {
+      1: '፩', 2: '፪', 3: '፫', 4: '፬', 5: '፭',
+      6: '፮', 7: '፯', 8: '፰', 9: '፱', 10: '፲',
+      20: '፳', 30: '፴', 40: '፵', 50: '፶',
+      60: '፷', 70: '፸', 80: '፹', 90: '፺',
+      100: '፻', 10000: '፼'
+    };
+
+    if (ethiopicNumerals[num]) {
+      return ethiopicNumerals[num];
+    }
+
+    let result = '';
+    let remaining = num;
+
+    // Handle tens and ones (up to 99)
+    if (remaining < 100) {
+      const tens = Math.floor(remaining / 10) * 10;
+      const ones = remaining % 10;
+      
+      if (tens > 0) result += ethiopicNumerals[tens];
+      if (ones > 0) result += ethiopicNumerals[ones];
+      
+      return result;
+    }
+
+    // For numbers >= 100, use a simpler digit-by-digit approach
+    const digits = num.toString().split('');
+    return digits.map(d => ethiopicNumerals[parseInt(d)] || d).join('');
   }
 
   /**

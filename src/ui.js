@@ -10,6 +10,9 @@ class EthiopianCalendarUI {
       onSelect: options.onSelect || null,
       inputElement: options.inputElement || null,
       initialDate: options.initialDate || new Date(),
+      showGregorian: options.showGregorian !== undefined ? options.showGregorian : true,
+      useAmharic: options.useAmharic !== undefined ? options.useAmharic : true,
+      useEthiopicNumbers: options.useEthiopicNumbers !== undefined ? options.useEthiopicNumbers : false,
       ...options
     };
     
@@ -64,27 +67,58 @@ class EthiopianCalendarUI {
   createPopup() {
     const popup = document.createElement('div');
     popup.className = 'ethcal-popup';
+    
+    const dayNamesHtml = this.options.useAmharic 
+      ? '<div>እሁድ</div><div>ሰኞ</div><div>ማክሰኞ</div><div>ረቡዕ</div><div>ሐሙስ</div><div>ዓርብ</div><div>ቅዳሜ</div>'
+      : '<div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>';
+
     popup.innerHTML = `
-      <div class="ethcal-header">
-        <button class="ethcal-prev-year" aria-label="Previous Year">&laquo;</button>
-        <button class="ethcal-prev-month" aria-label="Previous Month">&lsaquo;</button>
-        <div class="ethcal-current">
-          <span class="ethcal-month-name"></span>
-          <span class="ethcal-year"></span>
+      <div class="ethcal-options">
+        <label>
+          <input type="checkbox" class="ethcal-option-amharic" ${this.options.useAmharic ? 'checked' : ''}>
+          <span>Use Amharic</span>
+        </label>
+        <label>
+          <input type="checkbox" class="ethcal-option-ethiopic" ${this.options.useEthiopicNumbers ? 'checked' : ''}>
+          <span>Ethiopic Numbers</span>
+        </label>
+      </div>
+      <div class="ethcal-calendars">
+        <div class="ethcal-calendar ethcal-ethiopian">
+          <div class="ethcal-calendar-title">Ethiopian Calendar</div>
+          <div class="ethcal-header">
+            <button class="ethcal-prev-year" aria-label="Previous Year">&laquo;</button>
+            <button class="ethcal-prev-month" aria-label="Previous Month">&lsaquo;</button>
+            <div class="ethcal-current">
+              <span class="ethcal-month-name"></span>
+              <span class="ethcal-year"></span>
+            </div>
+            <button class="ethcal-next-month" aria-label="Next Month">&rsaquo;</button>
+            <button class="ethcal-next-year" aria-label="Next Year">&raquo;</button>
+          </div>
+          <div class="ethcal-weekdays">${dayNamesHtml}</div>
+          <div class="ethcal-days"></div>
         </div>
-        <button class="ethcal-next-month" aria-label="Next Month">&rsaquo;</button>
-        <button class="ethcal-next-year" aria-label="Next Year">&raquo;</button>
+        ${this.options.showGregorian ? `
+        <div class="ethcal-calendar ethcal-gregorian">
+          <div class="ethcal-calendar-title">Gregorian Calendar</div>
+          <div class="ethcal-header">
+            <button class="ethcal-greg-prev-year" aria-label="Previous Year">&laquo;</button>
+            <button class="ethcal-greg-prev-month" aria-label="Previous Month">&lsaquo;</button>
+            <div class="ethcal-current">
+              <span class="ethcal-greg-month-name"></span>
+              <span class="ethcal-greg-year"></span>
+            </div>
+            <button class="ethcal-greg-next-month" aria-label="Next Month">&rsaquo;</button>
+            <button class="ethcal-greg-next-year" aria-label="Next Year">&raquo;</button>
+          </div>
+          <div class="ethcal-weekdays">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+          </div>
+          <div class="ethcal-greg-days"></div>
+        </div>
+        ` : ''}
       </div>
-      <div class="ethcal-weekdays">
-        <div>እሁድ</div>
-        <div>ሰኞ</div>
-        <div>ማክሰኞ</div>
-        <div>ረቡዕ</div>
-        <div>ሐሙስ</div>
-        <div>ዓርብ</div>
-        <div>ቅዳሜ</div>
-      </div>
-      <div class="ethcal-days"></div>
       <div class="ethcal-footer">
         <button class="ethcal-today">Today</button>
         <button class="ethcal-close">Close</button>
@@ -109,13 +143,36 @@ class EthiopianCalendarUI {
   render() {
     const { year, month } = this.currentEthDate;
     
-    // Update header
+    // Update Ethiopian calendar header
     this.popup.querySelector('.ethcal-month-name').textContent = 
-      this.calendar.getMonthName(month);
-    this.popup.querySelector('.ethcal-year').textContent = year;
+      this.calendar.getMonthName(month, this.options.useAmharic);
+    const yearText = this.options.useEthiopicNumbers 
+      ? this.calendar.toEthiopicNumeral(year)
+      : year;
+    this.popup.querySelector('.ethcal-year').textContent = yearText;
     
-    // Render days
+    // Update weekday names based on useAmharic option
+    this.updateWeekdayNames();
+    
+    // Render Ethiopian calendar days
     this.renderDays();
+    
+    // Render Gregorian calendar if enabled
+    if (this.options.showGregorian) {
+      this.renderGregorianCalendar();
+    }
+  }
+
+  /**
+   * Update weekday names based on options
+   */
+  updateWeekdayNames() {
+    const weekdaysContainer = this.popup.querySelector('.ethcal-ethiopian .ethcal-weekdays');
+    if (this.options.useAmharic) {
+      weekdaysContainer.innerHTML = '<div>እሁድ</div><div>ሰኞ</div><div>ማክሰኞ</div><div>ረቡዕ</div><div>ሐሙስ</div><div>ዓርብ</div><div>ቅዳሜ</div>';
+    } else {
+      weekdaysContainer.innerHTML = '<div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>';
+    }
   }
 
   /**
@@ -140,7 +197,10 @@ class EthiopianCalendarUI {
     for (let day = 1; day <= daysInMonth; day++) {
       const dayCell = document.createElement('div');
       dayCell.className = 'ethcal-day';
-      dayCell.textContent = day;
+      const dayText = this.options.useEthiopicNumbers 
+        ? this.calendar.toEthiopicNumeral(day)
+        : day;
+      dayCell.textContent = dayText;
       dayCell.dataset.day = day;
       dayCell.dataset.month = month;
       dayCell.dataset.year = year;
@@ -164,10 +224,85 @@ class EthiopianCalendarUI {
   }
 
   /**
+   * Render Gregorian calendar
+   */
+  renderGregorianCalendar() {
+    const { year, month } = this.currentEthDate;
+    const gregDate = this.calendar.toGregorian(year, month, 1); // Use first day of month
+    const gregYear = gregDate.getFullYear();
+    const gregMonth = gregDate.getMonth();
+    
+    // Update header
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    this.popup.querySelector('.ethcal-greg-month-name').textContent = monthNames[gregMonth];
+    this.popup.querySelector('.ethcal-greg-year').textContent = gregYear;
+    
+    // Render days
+    const daysContainer = this.popup.querySelector('.ethcal-greg-days');
+    daysContainer.innerHTML = '';
+    
+    const firstDay = new Date(gregYear, gregMonth, 1).getDay();
+    const daysInMonth = new Date(gregYear, gregMonth + 1, 0).getDate();
+    
+    // Add empty cells
+    for (let i = 0; i < firstDay; i++) {
+      const emptyCell = document.createElement('div');
+      emptyCell.className = 'ethcal-day ethcal-empty';
+      daysContainer.appendChild(emptyCell);
+    }
+    
+    // Add days
+    const todayGreg = new Date();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayCell = document.createElement('div');
+      dayCell.className = 'ethcal-day ethcal-greg-day';
+      dayCell.textContent = d;
+      dayCell.dataset.day = d;
+      dayCell.dataset.month = gregMonth;
+      dayCell.dataset.year = gregYear;
+      
+      // Highlight today
+      if (gregYear === todayGreg.getFullYear() && 
+          gregMonth === todayGreg.getMonth() && 
+          d === todayGreg.getDate()) {
+        dayCell.classList.add('ethcal-today-highlight');
+      }
+      
+      // Highlight if this Gregorian date corresponds to the selected Ethiopian date
+      if (this.selectedDate) {
+        const selectedGreg = this.calendar.toGregorian(
+          this.selectedDate.year, 
+          this.selectedDate.month, 
+          this.selectedDate.day
+        );
+        if (gregYear === selectedGreg.getFullYear() && 
+            gregMonth === selectedGreg.getMonth() && 
+            d === selectedGreg.getDate()) {
+          dayCell.classList.add('ethcal-selected');
+        }
+      }
+      
+      daysContainer.appendChild(dayCell);
+    }
+  }
+
+  /**
    * Attach event listeners
    */
   attachEventListeners() {
-    // Navigation buttons
+    // Options toggles
+    this.popup.querySelector('.ethcal-option-amharic').addEventListener('change', (e) => {
+      this.options.useAmharic = e.target.checked;
+      this.render();
+    });
+
+    this.popup.querySelector('.ethcal-option-ethiopic').addEventListener('change', (e) => {
+      this.options.useEthiopicNumbers = e.target.checked;
+      this.render();
+    });
+
+    // Ethiopian calendar navigation buttons
     this.popup.querySelector('.ethcal-prev-year').addEventListener('click', () => {
       this.currentEthDate.year--;
       this.render();
@@ -195,8 +330,69 @@ class EthiopianCalendarUI {
       }
       this.render();
     });
+
+    // Gregorian calendar navigation buttons (if enabled)
+    if (this.options.showGregorian) {
+      this.popup.querySelector('.ethcal-greg-prev-year').addEventListener('click', () => {
+        const gregDate = this.calendar.toGregorian(this.currentEthDate.year, this.currentEthDate.month, 15);
+        gregDate.setFullYear(gregDate.getFullYear() - 1);
+        this.currentEthDate = this.calendar.toEthiopian(gregDate);
+        this.render();
+      });
+      
+      this.popup.querySelector('.ethcal-greg-next-year').addEventListener('click', () => {
+        const gregDate = this.calendar.toGregorian(this.currentEthDate.year, this.currentEthDate.month, 15);
+        gregDate.setFullYear(gregDate.getFullYear() + 1);
+        this.currentEthDate = this.calendar.toEthiopian(gregDate);
+        this.render();
+      });
+      
+      this.popup.querySelector('.ethcal-greg-prev-month').addEventListener('click', () => {
+        const gregDate = this.calendar.toGregorian(this.currentEthDate.year, this.currentEthDate.month, 15);
+        gregDate.setMonth(gregDate.getMonth() - 1);
+        this.currentEthDate = this.calendar.toEthiopian(gregDate);
+        this.render();
+      });
+      
+      this.popup.querySelector('.ethcal-greg-next-month').addEventListener('click', () => {
+        const gregDate = this.calendar.toGregorian(this.currentEthDate.year, this.currentEthDate.month, 15);
+        gregDate.setMonth(gregDate.getMonth() + 1);
+        this.currentEthDate = this.calendar.toEthiopian(gregDate);
+        this.render();
+      });
+
+      // Gregorian day selection
+      this.popup.querySelector('.ethcal-greg-days').addEventListener('click', (e) => {
+        if (e.target.classList.contains('ethcal-greg-day')) {
+          const day = parseInt(e.target.dataset.day);
+          const month = parseInt(e.target.dataset.month);
+          const year = parseInt(e.target.dataset.year);
+          
+          const gregorianDate = new Date(year, month, day);
+          const ethiopianDate = this.calendar.toEthiopian(gregorianDate);
+          
+          this.selectedDate = ethiopianDate;
+          this.currentEthDate = ethiopianDate;
+          this.render();
+          
+          if (this.options.onSelect) {
+            this.options.onSelect({
+              ethiopian: ethiopianDate,
+              gregorian: gregorianDate
+            });
+          }
+          
+          // Update input if provided
+          if (this.options.inputElement) {
+            this.options.inputElement.value = `${ethiopianDate.day}/${ethiopianDate.month}/${ethiopianDate.year}`;
+          }
+          
+          this.hide();
+        }
+      });
+    }
     
-    // Day selection
+    // Ethiopian day selection
     this.popup.querySelector('.ethcal-days').addEventListener('click', (e) => {
       if (e.target.classList.contains('ethcal-day') && !e.target.classList.contains('ethcal-empty')) {
         const day = parseInt(e.target.dataset.day);
