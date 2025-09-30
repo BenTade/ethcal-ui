@@ -193,6 +193,8 @@ export class EthiopianDatePickerComponent implements AfterViewInit, OnDestroy {
 
 ### PHP
 
+For client-side Ethiopian calendar UI:
+
 ```php
 <!DOCTYPE html>
 <html>
@@ -233,6 +235,28 @@ export class EthiopianDatePickerComponent implements AfterViewInit, OnDestroy {
     </script>
 </body>
 </html>
+```
+
+For server-side date conversion in PHP, the package includes an `EthiopianCalendar` class that uses the [andegna/calender](https://github.com/andegna/calender) package for accurate Ethiopian calendar calculations:
+
+```bash
+composer require bentade/ethcal-ui
+```
+
+```php
+<?php
+require_once 'vendor/autoload.php';
+require_once 'vendor/bentade/ethcal-ui/php/EthiopianCalendar.php';
+
+$calendar = new EthiopianCalendar();
+
+// Convert Gregorian to Ethiopian
+$ethDate = $calendar->toEthiopian('2024-09-11');
+echo $calendar->format($ethDate, 'd M y'); // 01 Meskerem 2017
+
+// Convert Ethiopian to Gregorian
+$gregDate = $calendar->toGregorian(2017, 1, 20);
+echo $gregDate->format('Y-m-d'); // 2024-09-30
 ```
 
 ## API Reference
