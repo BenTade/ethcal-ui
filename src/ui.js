@@ -75,16 +75,22 @@ class EthiopianCalendarUI {
     // Merged view - single calendar showing both dates
     if (this.options.mergedView) {
       const isPrimaryEthiopian = this.options.primaryCalendar === 'ethiopian';
+      // Determine button labels based on primary calendar
+      const yearPrevLabel = isPrimaryEthiopian ? 'አ-' : 'Y-';
+      const monthPrevLabel = isPrimaryEthiopian ? 'ወ-' : 'M-';
+      const monthNextLabel = isPrimaryEthiopian ? 'ወ+' : 'M+';
+      const yearNextLabel = isPrimaryEthiopian ? 'አ+' : 'Y+';
+      
       popup.innerHTML = `
         <div class="ethcal-options">
           <label>
             <input type="checkbox" class="ethcal-option-amharic" ${this.options.useAmharic ? 'checked' : ''}>
             <span>Use Amharic</span>
           </label>
-          <label>
+          ${isPrimaryEthiopian ? `<label>
             <input type="checkbox" class="ethcal-option-ethiopic" ${this.options.useEthiopicNumbers ? 'checked' : ''}>
             <span>Ethiopic Numbers</span>
-          </label>
+          </label>` : ''}
           <label>
             <input type="checkbox" class="ethcal-option-primary" ${isPrimaryEthiopian ? 'checked' : ''}>
             <span>Ethiopian Primary</span>
@@ -94,14 +100,14 @@ class EthiopianCalendarUI {
           <div class="ethcal-calendar ethcal-merged-calendar">
             <div class="ethcal-calendar-title">${isPrimaryEthiopian ? 'Ethiopian' : 'Gregorian'} Calendar (Primary)</div>
             <div class="ethcal-header">
-              <button class="ethcal-prev-year" aria-label="Previous Year">&laquo;</button>
-              <button class="ethcal-prev-month" aria-label="Previous Month">&lsaquo;</button>
+              <button class="ethcal-prev-year" aria-label="Previous Year">${yearPrevLabel}</button>
+              <button class="ethcal-prev-month" aria-label="Previous Month">${monthPrevLabel}</button>
               <div class="ethcal-current">
                 <span class="ethcal-month-name"></span>
                 <span class="ethcal-year"></span>
               </div>
-              <button class="ethcal-next-month" aria-label="Next Month">&rsaquo;</button>
-              <button class="ethcal-next-year" aria-label="Next Year">&raquo;</button>
+              <button class="ethcal-next-month" aria-label="Next Month">${monthNextLabel}</button>
+              <button class="ethcal-next-year" aria-label="Next Year">${yearNextLabel}</button>
             </div>
             <div class="ethcal-weekdays">${dayNamesHtml}</div>
             <div class="ethcal-days ethcal-merged-days"></div>
@@ -129,14 +135,14 @@ class EthiopianCalendarUI {
           <div class="ethcal-calendar ethcal-ethiopian">
             <div class="ethcal-calendar-title">Ethiopian Calendar</div>
             <div class="ethcal-header">
-              <button class="ethcal-prev-year" aria-label="Previous Year">&laquo;</button>
-              <button class="ethcal-prev-month" aria-label="Previous Month">&lsaquo;</button>
+              <button class="ethcal-prev-year" aria-label="Previous Year">አ-</button>
+              <button class="ethcal-prev-month" aria-label="Previous Month">ወ-</button>
               <div class="ethcal-current">
                 <span class="ethcal-month-name"></span>
                 <span class="ethcal-year"></span>
               </div>
-              <button class="ethcal-next-month" aria-label="Next Month">&rsaquo;</button>
-              <button class="ethcal-next-year" aria-label="Next Year">&raquo;</button>
+              <button class="ethcal-next-month" aria-label="Next Month">ወ+</button>
+              <button class="ethcal-next-year" aria-label="Next Year">አ+</button>
             </div>
             <div class="ethcal-weekdays">${dayNamesHtml}</div>
             <div class="ethcal-days"></div>
@@ -145,14 +151,14 @@ class EthiopianCalendarUI {
           <div class="ethcal-calendar ethcal-gregorian">
             <div class="ethcal-calendar-title">Gregorian Calendar</div>
             <div class="ethcal-header">
-              <button class="ethcal-greg-prev-year" aria-label="Previous Year">&laquo;</button>
-              <button class="ethcal-greg-prev-month" aria-label="Previous Month">&lsaquo;</button>
+              <button class="ethcal-greg-prev-year" aria-label="Previous Year">Y-</button>
+              <button class="ethcal-greg-prev-month" aria-label="Previous Month">M-</button>
               <div class="ethcal-current">
                 <span class="ethcal-greg-month-name"></span>
                 <span class="ethcal-greg-year"></span>
               </div>
-              <button class="ethcal-greg-next-month" aria-label="Next Month">&rsaquo;</button>
-              <button class="ethcal-greg-next-year" aria-label="Next Year">&raquo;</button>
+              <button class="ethcal-greg-next-month" aria-label="Next Month">M+</button>
+              <button class="ethcal-greg-next-year" aria-label="Next Year">Y+</button>
             </div>
             <div class="ethcal-weekdays">
               <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
@@ -198,12 +204,26 @@ class EthiopianCalendarUI {
     if (this.options.mergedView) {
       const isPrimaryEthiopian = this.options.primaryCalendar === 'ethiopian';
       
+      // Update button labels based on primary calendar
+      const yearPrevLabel = isPrimaryEthiopian ? 'አ-' : 'Y-';
+      const monthPrevLabel = isPrimaryEthiopian ? 'ወ-' : 'M-';
+      const monthNextLabel = isPrimaryEthiopian ? 'ወ+' : 'M+';
+      const yearNextLabel = isPrimaryEthiopian ? 'አ+' : 'Y+';
+      
+      this.popup.querySelector('.ethcal-prev-year').textContent = yearPrevLabel;
+      this.popup.querySelector('.ethcal-prev-month').textContent = monthPrevLabel;
+      this.popup.querySelector('.ethcal-next-month').textContent = monthNextLabel;
+      this.popup.querySelector('.ethcal-next-year').textContent = yearNextLabel;
+      
       if (isPrimaryEthiopian) {
         // Ethiopian is primary - use Amharic names and Ethiopian month
         this.popup.querySelector('.ethcal-month-name').textContent = 
           this.calendar.getMonthName(month, true);
-        // Year is always in Arabic numerals
-        this.popup.querySelector('.ethcal-year').textContent = year;
+        // Year - use Ethiopic numbers if enabled
+        const yearText = this.options.useEthiopicNumbers 
+          ? this.calendar.toEthiopicNumeral(year)
+          : year;
+        this.popup.querySelector('.ethcal-year').textContent = yearText;
       } else {
         // Gregorian is primary - use English names and Gregorian month
         const gregDate = this.calendar.toGregorian(year, month, 1);
@@ -212,7 +232,7 @@ class EthiopianCalendarUI {
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                             'July', 'August', 'September', 'October', 'November', 'December'];
         this.popup.querySelector('.ethcal-month-name').textContent = monthNames[gregMonth];
-        // Year is always in Arabic numerals
+        // Year is always in Arabic numerals for Gregorian
         this.popup.querySelector('.ethcal-year').textContent = gregYear;
       }
       
@@ -408,8 +428,10 @@ class EthiopianCalendarUI {
         const dayCell = document.createElement('div');
         dayCell.className = 'ethcal-day ethcal-merged-day';
         
-        // Primary date (Ethiopian) - always use Arabic numerals
-        const primaryText = day;
+        // Primary date (Ethiopian) - use Ethiopic numbers if enabled
+        const primaryText = this.options.useEthiopicNumbers 
+          ? this.calendar.toEthiopicNumeral(day)
+          : day;
         
         // Secondary date (Gregorian) - always use Arabic numerals
         const gregDate = this.calendar.toGregorian(year, month, day);
@@ -520,17 +542,25 @@ class EthiopianCalendarUI {
       this.render();
     });
 
-    this.popup.querySelector('.ethcal-option-ethiopic').addEventListener('change', (e) => {
-      this.options.useEthiopicNumbers = e.target.checked;
-      this.render();
-    });
+    const ethiopicToggle = this.popup.querySelector('.ethcal-option-ethiopic');
+    if (ethiopicToggle) {
+      ethiopicToggle.addEventListener('change', (e) => {
+        this.options.useEthiopicNumbers = e.target.checked;
+        this.render();
+      });
+    }
 
     // Primary calendar toggle (only in merged view)
     const primaryToggle = this.popup.querySelector('.ethcal-option-primary');
     if (primaryToggle) {
       primaryToggle.addEventListener('change', (e) => {
         this.options.primaryCalendar = e.target.checked ? 'ethiopian' : 'gregorian';
+        // Recreate popup to show/hide Ethiopic Numbers checkbox
+        const oldPopup = this.popup;
+        this.popup = this.createPopup();
+        oldPopup.replaceWith(this.popup);
         this.render();
+        this.attachEventListeners();
       });
     }
 
