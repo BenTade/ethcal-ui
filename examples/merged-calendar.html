@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merged Ethiopian Calendar - Example</title>
+    <link rel="stylesheet" href="../dist/ethcal-ui.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2196f3;
+        }
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .demo-input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 250px;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: 1px solid #2196f3;
+            background: #2196f3;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Merged Ethiopian Calendar</h1>
+    
+    <div class="info-box">
+        <h3>About Merged View</h3>
+        <p>The merged calendar view displays both Ethiopian and Gregorian dates in a single calendar grid. You can choose which calendar is primary (takes most space) and which is secondary (shows in the corner).</p>
+        <ul>
+            <li><strong>Primary calendar:</strong> Date displayed prominently in the center</li>
+            <li><strong>Secondary calendar:</strong> Date displayed in the top-right corner</li>
+            <li>Toggle between Ethiopian and Gregorian as primary using the checkbox</li>
+        </ul>
+    </div>
+    
+    <div class="demo-section">
+        <h2>Example 1: Ethiopian as Primary</h2>
+        <p>Click the input field to open the merged calendar with Ethiopian dates as primary:</p>
+        <input type="text" id="dateInput1" class="demo-input" placeholder="Select a date" readonly>
+        <div id="result1" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Example 2: Gregorian as Primary</h2>
+        <p>Click to open the merged calendar with Gregorian dates as primary:</p>
+        <input type="text" id="dateInput2" class="demo-input" placeholder="Select a date" readonly>
+        <div id="result2" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Example 3: Programmatic Calendar with Toggle</h2>
+        <p>Click the button to show a merged calendar where you can toggle the primary calendar:</p>
+        <button id="showCalendar">Show Merged Calendar</button>
+        <div id="result3" class="result"></div>
+    </div>
+
+    <script type="module">
+        import { EthiopianCalendar, EthiopianCalendarUI } from '../dist/ethcal-ui.esm.js';
+
+        // Example 1: Ethiopian as primary
+        const dateInput1 = document.getElementById('dateInput1');
+        const result1 = document.getElementById('result1');
+        
+        const calendar1 = new EthiopianCalendarUI({
+            inputElement: dateInput1,
+            mergedView: true,
+            primaryCalendar: 'ethiopian',
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result1.innerHTML = `
+                    <strong>Selected Date:</strong><br>
+                    Ethiopian: ${eth.day}/${eth.month}/${eth.year}<br>
+                    Gregorian: ${greg.toLocaleDateString()}
+                `;
+            }
+        });
+
+        dateInput1.addEventListener('click', () => {
+            calendar1.show();
+        });
+
+        // Example 2: Gregorian as primary
+        const dateInput2 = document.getElementById('dateInput2');
+        const result2 = document.getElementById('result2');
+        
+        const calendar2 = new EthiopianCalendarUI({
+            inputElement: dateInput2,
+            mergedView: true,
+            primaryCalendar: 'gregorian',
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result2.innerHTML = `
+                    <strong>Selected Date:</strong><br>
+                    Ethiopian: ${eth.day}/${eth.month}/${eth.year}<br>
+                    Gregorian: ${greg.toLocaleDateString()}
+                `;
+            }
+        });
+
+        dateInput2.addEventListener('click', () => {
+            calendar2.show();
+        });
+
+        // Example 3: Programmatic with toggle
+        const showCalendarBtn = document.getElementById('showCalendar');
+        const result3 = document.getElementById('result3');
+
+        const calendar3 = new EthiopianCalendarUI({
+            mergedView: true,
+            primaryCalendar: 'ethiopian',
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result3.innerHTML = `
+                    <strong>Selected Date:</strong><br>
+                    Ethiopian: ${eth.day}/${eth.month}/${eth.year}<br>
+                    Gregorian: ${greg.toLocaleDateString()}
+                `;
+            }
+        });
+
+        showCalendarBtn.addEventListener('click', () => {
+            calendar3.show();
+        });
+
+        // Show today's date
+        const converter = new EthiopianCalendar();
+        const today = converter.toEthiopian(new Date());
+        const todayMonthName = converter.getMonthName(today.month);
+        const todayGreg = new Date();
+        document.querySelector('h1').insertAdjacentHTML('afterend', 
+            `<p style="color: #666;">Today: ${today.day} ${todayMonthName} ${today.year} (${todayGreg.toLocaleDateString()})</p>`
+        );
+    </script>
+</body>
+</html>

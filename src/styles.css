@@ -210,3 +210,55 @@
     gap: 8px;
   }
 }
+
+/* Merged calendar styles */
+.ethcal-merged {
+  display: block;
+}
+
+.ethcal-merged-calendar {
+  min-width: 320px;
+}
+
+.ethcal-merged-day {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 4px;
+}
+
+.ethcal-primary-date {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.ethcal-secondary-date {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  color: #999;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1;
+}
+
+.ethcal-merged-day:hover .ethcal-secondary-date {
+  color: #666;
+  background: rgba(227, 242, 253, 0.9);
+}
+
+.ethcal-merged-day.ethcal-selected .ethcal-secondary-date {
+  color: white;
+  background: rgba(33, 150, 243, 0.8);
+}
+
+.ethcal-merged-day.ethcal-today-highlight .ethcal-secondary-date {
+  color: #856404;
+  background: rgba(255, 243, 205, 0.9);
+}
+
