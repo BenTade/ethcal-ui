@@ -103,8 +103,14 @@ class EthiopianCalendarUI {
               <button class="ethcal-prev-year" aria-label="Previous Year">${yearPrevLabel}</button>
               <button class="ethcal-prev-month" aria-label="Previous Month">${monthPrevLabel}</button>
               <div class="ethcal-current">
-                <span class="ethcal-month-name"></span>
-                <span class="ethcal-year"></span>
+                <div class="ethcal-primary-header">
+                  <span class="ethcal-month-name"></span>
+                  <span class="ethcal-year"></span>
+                </div>
+                <div class="ethcal-secondary-header">
+                  <span class="ethcal-secondary-month"></span>
+                  <span class="ethcal-secondary-year"></span>
+                </div>
               </div>
               <button class="ethcal-next-month" aria-label="Next Month">${monthNextLabel}</button>
               <button class="ethcal-next-year" aria-label="Next Year">${yearNextLabel}</button>
@@ -221,6 +227,33 @@ class EthiopianCalendarUI {
           this.calendar.getMonthName(month, true);
         // Year - always use Arabic numerals (not Ethiopic numbers)
         this.popup.querySelector('.ethcal-year').textContent = year;
+        
+        // Calculate secondary (Gregorian) month(s) and year(s)
+        const firstDay = this.calendar.toGregorian(year, month, 1);
+        const lastDayNum = this.calendar.getDaysInMonth(year, month);
+        const lastDay = this.calendar.toGregorian(year, month, lastDayNum);
+        
+        const firstGregMonth = firstDay.getMonth();
+        const firstGregYear = firstDay.getFullYear();
+        const lastGregMonth = lastDay.getMonth();
+        const lastGregYear = lastDay.getFullYear();
+        
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        // Build secondary calendar display
+        let secondaryMonthText = monthNames[firstGregMonth];
+        if (firstGregMonth !== lastGregMonth) {
+          secondaryMonthText += '/' + monthNames[lastGregMonth];
+        }
+        
+        let secondaryYearText = firstGregYear.toString();
+        if (firstGregYear !== lastGregYear) {
+          secondaryYearText += '/' + lastGregYear;
+        }
+        
+        this.popup.querySelector('.ethcal-secondary-month').textContent = secondaryMonthText;
+        this.popup.querySelector('.ethcal-secondary-year').textContent = secondaryYearText;
       } else {
         // Gregorian is primary - use English names and Gregorian month
         const gregDate = this.calendar.toGregorian(year, month, 1);
@@ -231,6 +264,27 @@ class EthiopianCalendarUI {
         this.popup.querySelector('.ethcal-month-name').textContent = monthNames[gregMonth];
         // Year is always in Arabic numerals for Gregorian
         this.popup.querySelector('.ethcal-year').textContent = gregYear;
+        
+        // Calculate secondary (Ethiopian) month(s) and year(s)
+        const firstDay = new Date(gregYear, gregMonth, 1);
+        const lastDay = new Date(gregYear, gregMonth + 1, 0);
+        
+        const firstEthDate = this.calendar.toEthiopian(firstDay);
+        const lastEthDate = this.calendar.toEthiopian(lastDay);
+        
+        // Build secondary calendar display
+        let secondaryMonthText = this.calendar.getMonthName(firstEthDate.month, false);
+        if (firstEthDate.month !== lastEthDate.month) {
+          secondaryMonthText += '/' + this.calendar.getMonthName(lastEthDate.month, false);
+        }
+        
+        let secondaryYearText = firstEthDate.year.toString();
+        if (firstEthDate.year !== lastEthDate.year) {
+          secondaryYearText += '/' + lastEthDate.year;
+        }
+        
+        this.popup.querySelector('.ethcal-secondary-month').textContent = secondaryMonthText;
+        this.popup.querySelector('.ethcal-secondary-year').textContent = secondaryYearText;
       }
       
       const titleElement = this.popup.querySelector('.ethcal-calendar-title');
