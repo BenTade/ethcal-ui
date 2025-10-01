@@ -76,8 +76,8 @@ class EthiopianCalendarUI {
     if (this.options.mergedView) {
       const isPrimaryEthiopian = this.options.primaryCalendar === 'ethiopian';
       // Determine button labels based on primary calendar
-      const yearPrevLabel = isPrimaryEthiopian ? 'አ<' : 'Y<';
-      const monthPrevLabel = isPrimaryEthiopian ? 'ወ<' : 'M<';
+      const yearPrevLabel = isPrimaryEthiopian ? '<አ' : '<Y';
+      const monthPrevLabel = isPrimaryEthiopian ? '<ወ' : '<M';
       const monthNextLabel = isPrimaryEthiopian ? 'ወ>' : 'M>';
       const yearNextLabel = isPrimaryEthiopian ? 'አ>' : 'Y>';
       
@@ -114,8 +114,8 @@ class EthiopianCalendarUI {
         <div class="ethcal-calendars">
           <div class="ethcal-calendar ethcal-ethiopian">
             <div class="ethcal-header">
-              <button class="ethcal-prev-year" aria-label="Previous Year">አ<</button>
-              <button class="ethcal-prev-month" aria-label="Previous Month">ወ<</button>
+              <button class="ethcal-prev-year" aria-label="Previous Year"><አ</button>
+              <button class="ethcal-prev-month" aria-label="Previous Month"><ወ</button>
               <div class="ethcal-current">
                 <span class="ethcal-month-name"></span>
                 <span class="ethcal-year"></span>
@@ -129,8 +129,8 @@ class EthiopianCalendarUI {
           ${this.options.showGregorian ? `
           <div class="ethcal-calendar ethcal-gregorian">
             <div class="ethcal-header">
-              <button class="ethcal-greg-prev-year" aria-label="Previous Year">Y<</button>
-              <button class="ethcal-greg-prev-month" aria-label="Previous Month">M<</button>
+              <button class="ethcal-greg-prev-year" aria-label="Previous Year"><Y</button>
+              <button class="ethcal-greg-prev-month" aria-label="Previous Month"><M</button>
               <div class="ethcal-current">
                 <span class="ethcal-greg-month-name"></span>
                 <span class="ethcal-greg-year"></span>
@@ -182,8 +182,8 @@ class EthiopianCalendarUI {
       const isPrimaryEthiopian = this.options.primaryCalendar === 'ethiopian';
       
       // Update button labels based on primary calendar
-      const yearPrevLabel = isPrimaryEthiopian ? 'አ<' : 'Y<';
-      const monthPrevLabel = isPrimaryEthiopian ? 'ወ<' : 'M<';
+      const yearPrevLabel = isPrimaryEthiopian ? '<አ' : '<Y';
+      const monthPrevLabel = isPrimaryEthiopian ? '<ወ' : '<M';
       const monthNextLabel = isPrimaryEthiopian ? 'ወ>' : 'M>';
       const yearNextLabel = isPrimaryEthiopian ? 'አ>' : 'Y>';
       
