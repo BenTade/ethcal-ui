@@ -219,11 +219,8 @@ class EthiopianCalendarUI {
         // Ethiopian is primary - use Amharic names and Ethiopian month
         this.popup.querySelector('.ethcal-month-name').textContent = 
           this.calendar.getMonthName(month, true);
-        // Year - use Ethiopic numbers if enabled
-        const yearText = this.options.useEthiopicNumbers 
-          ? this.calendar.toEthiopicNumeral(year)
-          : year;
-        this.popup.querySelector('.ethcal-year').textContent = yearText;
+        // Year - always use Arabic numerals (not Ethiopic numbers)
+        this.popup.querySelector('.ethcal-year').textContent = year;
       } else {
         // Gregorian is primary - use English names and Gregorian month
         const gregDate = this.calendar.toGregorian(year, month, 1);
@@ -244,10 +241,8 @@ class EthiopianCalendarUI {
       // Non-merged view - use the useAmharic option
       this.popup.querySelector('.ethcal-month-name').textContent = 
         this.calendar.getMonthName(month, this.options.useAmharic);
-      const yearText = this.options.useEthiopicNumbers 
-        ? this.calendar.toEthiopicNumeral(year)
-        : year;
-      this.popup.querySelector('.ethcal-year').textContent = yearText;
+      // Year - always use Arabic numerals (not Ethiopic numbers)
+      this.popup.querySelector('.ethcal-year').textContent = year;
     }
     
     // Update weekday names based on primary calendar or useAmharic option
