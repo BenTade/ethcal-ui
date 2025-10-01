@@ -98,13 +98,18 @@ class EthiopianCalendarUI {
         </div>
         <div class="ethcal-calendars ethcal-merged">
           <div class="ethcal-calendar ethcal-merged-calendar">
-            <div class="ethcal-calendar-title">${isPrimaryEthiopian ? 'Ethiopian' : 'Gregorian'} Calendar (Primary)</div>
             <div class="ethcal-header">
               <button class="ethcal-prev-year" aria-label="Previous Year">${yearPrevLabel}</button>
               <button class="ethcal-prev-month" aria-label="Previous Month">${monthPrevLabel}</button>
               <div class="ethcal-current">
-                <span class="ethcal-month-name"></span>
-                <span class="ethcal-year"></span>
+                <div class="ethcal-primary-header">
+                  <span class="ethcal-month-name"></span>
+                  <span class="ethcal-year"></span>
+                </div>
+                <div class="ethcal-secondary-header">
+                  <span class="ethcal-secondary-month-name"></span>
+                  <span class="ethcal-secondary-year"></span>
+                </div>
               </div>
               <button class="ethcal-next-month" aria-label="Next Month">${monthNextLabel}</button>
               <button class="ethcal-next-year" aria-label="Next Year">${yearNextLabel}</button>
@@ -215,27 +220,31 @@ class EthiopianCalendarUI {
       this.popup.querySelector('.ethcal-next-month').textContent = monthNextLabel;
       this.popup.querySelector('.ethcal-next-year').textContent = yearNextLabel;
       
+      // Get both Ethiopian and Gregorian dates
+      const gregDate = this.calendar.toGregorian(year, month, 1);
+      const gregYear = gregDate.getFullYear();
+      const gregMonth = gregDate.getMonth();
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+      
       if (isPrimaryEthiopian) {
-        // Ethiopian is primary - use Amharic names and Ethiopian month
+        // Ethiopian is primary - always use Ethiopic (Amharic) names for Ethiopian
         this.popup.querySelector('.ethcal-month-name').textContent = 
           this.calendar.getMonthName(month, true);
-        // Year - always use Arabic numerals (not Ethiopic numbers)
         this.popup.querySelector('.ethcal-year').textContent = year;
+        
+        // Gregorian is secondary
+        this.popup.querySelector('.ethcal-secondary-month-name').textContent = monthNames[gregMonth];
+        this.popup.querySelector('.ethcal-secondary-year').textContent = gregYear;
       } else {
-        // Gregorian is primary - use English names and Gregorian month
-        const gregDate = this.calendar.toGregorian(year, month, 1);
-        const gregYear = gregDate.getFullYear();
-        const gregMonth = gregDate.getMonth();
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                            'July', 'August', 'September', 'October', 'November', 'December'];
+        // Gregorian is primary
         this.popup.querySelector('.ethcal-month-name').textContent = monthNames[gregMonth];
-        // Year is always in Arabic numerals for Gregorian
         this.popup.querySelector('.ethcal-year').textContent = gregYear;
-      }
-      
-      const titleElement = this.popup.querySelector('.ethcal-calendar-title');
-      if (titleElement) {
-        titleElement.textContent = `${isPrimaryEthiopian ? 'Ethiopian' : 'Gregorian'} Calendar (Primary)`;
+        
+        // Ethiopian is secondary - always use Ethiopic (Amharic) names for Ethiopian
+        this.popup.querySelector('.ethcal-secondary-month-name').textContent = 
+          this.calendar.getMonthName(month, true);
+        this.popup.querySelector('.ethcal-secondary-year').textContent = year;
       }
     } else {
       // Non-merged view - use the useAmharic option

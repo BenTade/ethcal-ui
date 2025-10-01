@@ -59,8 +59,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
-  gap: 8px;
+  margin-bottom: 12px;
+  gap: 6px;
 }
 
 .ethcal-header button {
@@ -73,6 +73,16 @@
   transition: all 0.2s;
 }
 
+.ethcal-merged-calendar .ethcal-header {
+  margin-bottom: 8px;
+  gap: 4px;
+}
+
+.ethcal-merged-calendar .ethcal-header button {
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
 .ethcal-header button:hover {
   background: #f5f5f5;
   border-color: #999;
@@ -82,20 +92,47 @@
   flex: 1;
   text-align: center;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+}
+
+.ethcal-primary-header {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+}
+
+.ethcal-secondary-header {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: #888;
 }
 
 .ethcal-month-name {
   color: #333;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .ethcal-year {
   color: #666;
-  font-size: 14px;
+  font-size: 13px;
+}
+
+.ethcal-secondary-month-name {
+  color: #666;
+  font-size: 11px;
+}
+
+.ethcal-secondary-year {
+  color: #888;
+  font-size: 11px;
 }
 
 .ethcal-weekdays {
@@ -110,7 +147,17 @@
 }
 
 .ethcal-weekdays div {
-  padding: 8px 4px;
+  padding: 6px 2px;
+}
+
+.ethcal-merged-calendar .ethcal-weekdays {
+  gap: 2px;
+  margin-bottom: 4px;
+  font-size: 10px;
+}
+
+.ethcal-merged-calendar .ethcal-weekdays div {
+  padding: 4px 1px;
 }
 
 .ethcal-days {
@@ -118,6 +165,11 @@
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
   margin-bottom: 16px;
+}
+
+.ethcal-merged-calendar .ethcal-days {
+  gap: 2px;
+  margin-bottom: 12px;
 }
 
 .ethcal-day {
@@ -130,6 +182,11 @@
   font-size: 14px;
   transition: all 0.2s;
   border: 1px solid transparent;
+}
+
+.ethcal-merged-calendar .ethcal-day {
+  font-size: 12px;
+  border-radius: 3px;
 }
 
 .ethcal-day:not(.ethcal-empty):hover {
@@ -217,7 +274,8 @@
 }
 
 .ethcal-merged-calendar {
-  min-width: 320px;
+  min-width: 280px;
+  max-width: 280px;
 }
 
 .ethcal-merged-day {
@@ -226,23 +284,23 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: 4px;
+  padding: 2px;
 }
 
 .ethcal-primary-date {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 600;
   color: #333;
 }
 
 .ethcal-secondary-date {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  font-size: 10px;
+  top: 1px;
+  right: 1px;
+  font-size: 8px;
   color: #999;
   background: rgba(255, 255, 255, 0.9);
-  padding: 1px 3px;
+  padding: 1px 2px;
   border-radius: 2px;
   line-height: 1;
 }
