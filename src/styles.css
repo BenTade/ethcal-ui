@@ -39,13 +39,14 @@
 }
 
 .ethcal-header button {
-  background: transparent;
-  border: 1px solid #ddd;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
   padding: 4px 8px;
   font-size: 14px;
   transition: all 0.2s;
+  color: #333;
 }
 
 .ethcal-header button:hover {
