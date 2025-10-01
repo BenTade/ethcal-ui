@@ -82,23 +82,8 @@ class EthiopianCalendarUI {
       const yearNextLabel = isPrimaryEthiopian ? 'አ+' : 'Y+';
       
       popup.innerHTML = `
-        <div class="ethcal-options">
-          <label>
-            <input type="checkbox" class="ethcal-option-amharic" ${this.options.useAmharic ? 'checked' : ''}>
-            <span>Use Amharic</span>
-          </label>
-          <label>
-            <input type="checkbox" class="ethcal-option-ethiopic" ${this.options.useEthiopicNumbers ? 'checked' : ''}>
-            <span>Ethiopic Numbers</span>
-          </label>
-          <label>
-            <input type="checkbox" class="ethcal-option-primary" ${isPrimaryEthiopian ? 'checked' : ''}>
-            <span>Ethiopian Primary</span>
-          </label>
-        </div>
         <div class="ethcal-calendars ethcal-merged">
           <div class="ethcal-calendar ethcal-merged-calendar">
-            <div class="ethcal-calendar-title">${isPrimaryEthiopian ? 'Ethiopian' : 'Gregorian'} Calendar (Primary)</div>
             <div class="ethcal-header">
               <button class="ethcal-prev-year" aria-label="Previous Year">${yearPrevLabel}</button>
               <button class="ethcal-prev-month" aria-label="Previous Month">${monthPrevLabel}</button>
@@ -121,25 +106,13 @@ class EthiopianCalendarUI {
         </div>
         <div class="ethcal-footer">
           <button class="ethcal-today">Today</button>
-          <button class="ethcal-close">Close</button>
         </div>
       `;
     } else {
       // Original side-by-side view
       popup.innerHTML = `
-        <div class="ethcal-options">
-          <label>
-            <input type="checkbox" class="ethcal-option-amharic" ${this.options.useAmharic ? 'checked' : ''}>
-            <span>Use Amharic</span>
-          </label>
-          <label>
-            <input type="checkbox" class="ethcal-option-ethiopic" ${this.options.useEthiopicNumbers ? 'checked' : ''}>
-            <span>Ethiopic Numbers</span>
-          </label>
-        </div>
         <div class="ethcal-calendars">
           <div class="ethcal-calendar ethcal-ethiopian">
-            <div class="ethcal-calendar-title">Ethiopian Calendar</div>
             <div class="ethcal-header">
               <button class="ethcal-prev-year" aria-label="Previous Year">አ-</button>
               <button class="ethcal-prev-month" aria-label="Previous Month">ወ-</button>
@@ -155,7 +128,6 @@ class EthiopianCalendarUI {
           </div>
           ${this.options.showGregorian ? `
           <div class="ethcal-calendar ethcal-gregorian">
-            <div class="ethcal-calendar-title">Gregorian Calendar</div>
             <div class="ethcal-header">
               <button class="ethcal-greg-prev-year" aria-label="Previous Year">Y-</button>
               <button class="ethcal-greg-prev-month" aria-label="Previous Month">M-</button>
@@ -175,7 +147,6 @@ class EthiopianCalendarUI {
         </div>
         <div class="ethcal-footer">
           <button class="ethcal-today">Today</button>
-          <button class="ethcal-close">Close</button>
         </div>
       `;
     }
@@ -625,34 +596,6 @@ class EthiopianCalendarUI {
    * Attach event listeners
    */
   attachEventListeners() {
-    // Options toggles
-    this.popup.querySelector('.ethcal-option-amharic').addEventListener('change', (e) => {
-      this.options.useAmharic = e.target.checked;
-      this.render();
-    });
-
-    const ethiopicToggle = this.popup.querySelector('.ethcal-option-ethiopic');
-    if (ethiopicToggle) {
-      ethiopicToggle.addEventListener('change', (e) => {
-        this.options.useEthiopicNumbers = e.target.checked;
-        this.render();
-      });
-    }
-
-    // Primary calendar toggle (only in merged view)
-    const primaryToggle = this.popup.querySelector('.ethcal-option-primary');
-    if (primaryToggle) {
-      primaryToggle.addEventListener('change', (e) => {
-        this.options.primaryCalendar = e.target.checked ? 'ethiopian' : 'gregorian';
-        // Recreate popup to update button labels and calendar layout
-        const oldPopup = this.popup;
-        this.popup = this.createPopup();
-        oldPopup.replaceWith(this.popup);
-        this.render();
-        this.attachEventListeners();
-      });
-    }
-
     // Ethiopian calendar navigation buttons
     this.popup.querySelector('.ethcal-prev-year').addEventListener('click', () => {
       this.currentEthDate.year--;
@@ -776,11 +719,6 @@ class EthiopianCalendarUI {
     this.popup.querySelector('.ethcal-today').addEventListener('click', () => {
       this.currentEthDate = this.calendar.now();
       this.render();
-    });
-    
-    // Close button
-    this.popup.querySelector('.ethcal-close').addEventListener('click', () => {
-      this.hide();
     });
     
     // Close on outside click
