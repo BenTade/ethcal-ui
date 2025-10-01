@@ -247,7 +247,25 @@
   line-height: 1;
 }
 
+.ethcal-secondary-month {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  font-size: 8px;
+  color: #999;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .ethcal-merged-day:hover .ethcal-secondary-date {
+  color: #666;
+  background: rgba(227, 242, 253, 0.9);
+}
+
+.ethcal-merged-day:hover .ethcal-secondary-month {
   color: #666;
   background: rgba(227, 242, 253, 0.9);
 }
@@ -257,7 +275,17 @@
   background: rgba(33, 150, 243, 0.8);
 }
 
+.ethcal-merged-day.ethcal-selected .ethcal-secondary-month {
+  color: white;
+  background: rgba(33, 150, 243, 0.8);
+}
+
 .ethcal-merged-day.ethcal-today-highlight .ethcal-secondary-date {
+  color: #856404;
+  background: rgba(255, 243, 205, 0.9);
+}
+
+.ethcal-merged-day.ethcal-today-highlight .ethcal-secondary-month {
   color: #856404;
   background: rgba(255, 243, 205, 0.9);
 }

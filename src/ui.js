@@ -432,9 +432,16 @@ class EthiopianCalendarUI {
         const gregDate = this.calendar.toGregorian(year, month, day);
         const secondaryText = gregDate.getDate();
         
+        // Secondary month and year (Gregorian)
+        const gregMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const secondaryMonth = gregMonthNames[gregDate.getMonth()];
+        const secondaryYear = gregDate.getFullYear();
+        
         dayCell.innerHTML = `
           <span class="ethcal-primary-date">${primaryText}</span>
           <span class="ethcal-secondary-date">${secondaryText}</span>
+          <span class="ethcal-secondary-month">${secondaryMonth} ${secondaryYear}</span>
         `;
         
         dayCell.dataset.day = day;
@@ -491,9 +498,14 @@ class EthiopianCalendarUI {
           ? this.calendar.toEthiopicNumeral(ethDate.day)
           : ethDate.day;
         
+        // Secondary month and year (Ethiopian)
+        const secondaryMonth = this.calendar.getMonthName(ethDate.month, false);
+        const secondaryYear = ethDate.year;
+        
         dayCell.innerHTML = `
           <span class="ethcal-primary-date">${primaryText}</span>
           <span class="ethcal-secondary-date">${secondaryText}</span>
+          <span class="ethcal-secondary-month">${secondaryMonth} ${secondaryYear}</span>
         `;
         
         dayCell.dataset.day = ethDate.day;
