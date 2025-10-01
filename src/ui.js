@@ -103,8 +103,14 @@ class EthiopianCalendarUI {
               <button class="ethcal-prev-year" aria-label="Previous Year">${yearPrevLabel}</button>
               <button class="ethcal-prev-month" aria-label="Previous Month">${monthPrevLabel}</button>
               <div class="ethcal-current">
-                <span class="ethcal-month-name"></span>
-                <span class="ethcal-year"></span>
+                <div class="ethcal-primary-header">
+                  <span class="ethcal-month-name"></span>
+                  <span class="ethcal-year"></span>
+                </div>
+                <div class="ethcal-secondary-header">
+                  <span class="ethcal-secondary-month-name"></span>
+                  <span class="ethcal-secondary-year"></span>
+                </div>
               </div>
               <button class="ethcal-next-month" aria-label="Next Month">${monthNextLabel}</button>
               <button class="ethcal-next-year" aria-label="Next Year">${yearNextLabel}</button>
@@ -215,22 +221,67 @@ class EthiopianCalendarUI {
       this.popup.querySelector('.ethcal-next-month').textContent = monthNextLabel;
       this.popup.querySelector('.ethcal-next-year').textContent = yearNextLabel;
       
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+      
       if (isPrimaryEthiopian) {
         // Ethiopian is primary - use Amharic names and Ethiopian month
-        this.popup.querySelector('.ethcal-month-name').textContent = 
-          this.calendar.getMonthName(month, true);
-        // Year - always use Arabic numerals (not Ethiopic numbers)
-        this.popup.querySelector('.ethcal-year').textContent = year;
+        const primaryMonthName = this.calendar.getMonthName(month, true);
+        const primaryYear = year;
+        
+        this.popup.querySelector('.ethcal-month-name').textContent = primaryMonthName;
+        this.popup.querySelector('.ethcal-year').textContent = primaryYear;
+        
+        // Get secondary (Gregorian) month range
+        const secondaryRange = this.getSecondaryMonthRange(year, month, true);
+        let secondaryText = '';
+        
+        if (secondaryRange.isSameMonth) {
+          secondaryText = `${monthNames[secondaryRange.startMonth]} ${secondaryRange.startYear}`;
+        } else {
+          // Different months - show as range
+          const startMonthName = monthNames[secondaryRange.startMonth];
+          const endMonthName = monthNames[secondaryRange.endMonth];
+          
+          if (secondaryRange.startYear === secondaryRange.endYear) {
+            secondaryText = `${startMonthName} - ${endMonthName} ${secondaryRange.startYear}`;
+          } else {
+            secondaryText = `${startMonthName} ${secondaryRange.startYear} - ${endMonthName} ${secondaryRange.endYear}`;
+          }
+        }
+        
+        this.popup.querySelector('.ethcal-secondary-month-name').textContent = secondaryText;
+        this.popup.querySelector('.ethcal-secondary-year').textContent = '';
       } else {
         // Gregorian is primary - use English names and Gregorian month
         const gregDate = this.calendar.toGregorian(year, month, 1);
         const gregYear = gregDate.getFullYear();
         const gregMonth = gregDate.getMonth();
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                            'July', 'August', 'September', 'October', 'November', 'December'];
+        
         this.popup.querySelector('.ethcal-month-name').textContent = monthNames[gregMonth];
-        // Year is always in Arabic numerals for Gregorian
         this.popup.querySelector('.ethcal-year').textContent = gregYear;
+        
+        // Get secondary (Ethiopian) month range - use Ethiopic script
+        const secondaryRange = this.getSecondaryMonthRange(gregYear, gregMonth, false);
+        let secondaryText = '';
+        
+        if (secondaryRange.isSameMonth) {
+          const ethMonthName = this.calendar.getMonthName(secondaryRange.startMonth, true);
+          secondaryText = `${ethMonthName} ${secondaryRange.startYear}`;
+        } else {
+          // Different months - show as range using Ethiopic script
+          const startMonthName = this.calendar.getMonthName(secondaryRange.startMonth, true);
+          const endMonthName = this.calendar.getMonthName(secondaryRange.endMonth, true);
+          
+          if (secondaryRange.startYear === secondaryRange.endYear) {
+            secondaryText = `${startMonthName} - ${endMonthName} ${secondaryRange.startYear}`;
+          } else {
+            secondaryText = `${startMonthName} ${secondaryRange.startYear} - ${endMonthName} ${secondaryRange.endYear}`;
+          }
+        }
+        
+        this.popup.querySelector('.ethcal-secondary-month-name').textContent = secondaryText;
+        this.popup.querySelector('.ethcal-secondary-year').textContent = '';
       }
       
       const titleElement = this.popup.querySelector('.ethcal-calendar-title');
@@ -392,6 +443,47 @@ class EthiopianCalendarUI {
       }
       
       daysContainer.appendChild(dayCell);
+    }
+  }
+
+  /**
+   * Get the secondary month range for a given primary month
+   * Returns the secondary months that overlap with the primary month
+   */
+  getSecondaryMonthRange(year, month, isPrimaryEthiopian) {
+    if (isPrimaryEthiopian) {
+      // Primary is Ethiopian, secondary is Gregorian
+      const firstDay = this.calendar.toGregorian(year, month, 1);
+      const daysInMonth = this.calendar.getDaysInMonth(year, month);
+      const lastDay = this.calendar.toGregorian(year, month, daysInMonth);
+      
+      const firstMonth = firstDay.getMonth();
+      const firstYear = firstDay.getFullYear();
+      const lastMonth = lastDay.getMonth();
+      const lastYear = lastDay.getFullYear();
+      
+      return {
+        startMonth: firstMonth,
+        startYear: firstYear,
+        endMonth: lastMonth,
+        endYear: lastYear,
+        isSameMonth: firstMonth === lastMonth && firstYear === lastYear
+      };
+    } else {
+      // Primary is Gregorian, secondary is Ethiopian
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0); // Last day of month
+      
+      const firstEth = this.calendar.toEthiopian(firstDay);
+      const lastEth = this.calendar.toEthiopian(lastDay);
+      
+      return {
+        startMonth: firstEth.month,
+        startYear: firstEth.year,
+        endMonth: lastEth.month,
+        endYear: lastEth.year,
+        isSameMonth: firstEth.month === lastEth.month && firstEth.year === lastEth.year
+      };
     }
   }
 
