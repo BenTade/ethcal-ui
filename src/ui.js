@@ -109,6 +109,9 @@ class EthiopianCalendarUI {
               <button class="ethcal-next-month" aria-label="Next Month">${monthNextLabel}</button>
               <button class="ethcal-next-year" aria-label="Next Year">${yearNextLabel}</button>
             </div>
+            <div class="ethcal-secondary-header">
+              <span class="ethcal-secondary-month-year"></span>
+            </div>
             <div class="ethcal-weekdays">${dayNamesHtml}</div>
             <div class="ethcal-days ethcal-merged-days"></div>
           </div>
@@ -221,6 +224,17 @@ class EthiopianCalendarUI {
           this.calendar.getMonthName(month, true);
         // Year - always use Arabic numerals (not Ethiopic numbers)
         this.popup.querySelector('.ethcal-year').textContent = year;
+        
+        // Secondary: Gregorian calendar
+        const gregDate = this.calendar.toGregorian(year, month, 1);
+        const gregYear = gregDate.getFullYear();
+        const gregMonth = gregDate.getMonth();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+        const secondaryHeader = this.popup.querySelector('.ethcal-secondary-month-year');
+        if (secondaryHeader) {
+          secondaryHeader.textContent = `${monthNames[gregMonth]} ${gregYear}`;
+        }
       } else {
         // Gregorian is primary - use English names and Gregorian month
         const gregDate = this.calendar.toGregorian(year, month, 1);
@@ -231,6 +245,13 @@ class EthiopianCalendarUI {
         this.popup.querySelector('.ethcal-month-name').textContent = monthNames[gregMonth];
         // Year is always in Arabic numerals for Gregorian
         this.popup.querySelector('.ethcal-year').textContent = gregYear;
+        
+        // Secondary: Ethiopian calendar - use Ethiopic month names
+        const secondaryHeader = this.popup.querySelector('.ethcal-secondary-month-year');
+        if (secondaryHeader) {
+          const ethMonthName = this.calendar.getMonthName(month, true);
+          secondaryHeader.textContent = `${ethMonthName} ${year}`;
+        }
       }
       
       const titleElement = this.popup.querySelector('.ethcal-calendar-title');

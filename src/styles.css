@@ -220,6 +220,18 @@
   min-width: 320px;
 }
 
+.ethcal-secondary-header {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
+  padding: 4px 0;
+}
+
+.ethcal-secondary-month-year {
+  font-weight: 500;
+}
+
 .ethcal-merged-day {
   position: relative;
   display: flex;
