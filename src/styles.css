@@ -85,7 +85,24 @@
   font-size: 16px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+}
+
+.ethcal-primary-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.ethcal-secondary-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #666;
 }
 
 .ethcal-month-name {
@@ -96,6 +113,16 @@
 .ethcal-year {
   color: #666;
   font-size: 14px;
+}
+
+.ethcal-secondary-month-name {
+  color: #666;
+  font-size: 12px;
+}
+
+.ethcal-secondary-year {
+  color: #666;
+  font-size: 11px;
 }
 
 .ethcal-weekdays {
