@@ -129,14 +129,14 @@ class EthiopianCalendarUI {
           ${this.options.showGregorian ? `
           <div class="ethcal-calendar ethcal-gregorian">
             <div class="ethcal-header">
-              <button class="ethcal-greg-prev-year" aria-label="Previous Year"><Y</button>
-              <button class="ethcal-greg-prev-month" aria-label="Previous Month"><M</button>
+              <button class="ethcal-greg-prev-year" aria-label="Previous Year">&lt;Y</button>
+              <button class="ethcal-greg-prev-month" aria-label="Previous Month">&lt;M</button>
               <div class="ethcal-current">
                 <span class="ethcal-greg-month-name"></span>
                 <span class="ethcal-greg-year"></span>
               </div>
-              <button class="ethcal-greg-next-month" aria-label="Next Month">M></button>
-              <button class="ethcal-greg-next-year" aria-label="Next Year">Y></button>
+              <button class="ethcal-greg-next-month" aria-label="Next Month">M&gt;</button>
+              <button class="ethcal-greg-next-year" aria-label="Next Year">Y&gt;</button>
             </div>
             <div class="ethcal-weekdays">
               <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
