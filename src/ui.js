@@ -354,63 +354,82 @@ class EthiopianCalendarUI {
   }
 
   /**
-   * Render Gregorian calendar
+   * Render Gregorian calendar synced with Ethiopian calendar
    */
   renderGregorianCalendar() {
     const { year, month } = this.currentEthDate;
-    const gregDate = this.calendar.toGregorian(year, month, 1); // Use first day of month
-    const gregYear = gregDate.getFullYear();
-    const gregMonth = gregDate.getMonth();
+    const daysInEthMonth = this.calendar.getDaysInMonth(year, month);
     
-    // Update header
+    // Get the Gregorian date range for the Ethiopian month
+    const firstEthDate = this.calendar.toGregorian(year, month, 1);
+    const lastEthDate = this.calendar.toGregorian(year, month, daysInEthMonth);
+    
+    // Determine the month(s) to display in header
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'];
-    this.popup.querySelector('.ethcal-greg-month-name').textContent = monthNames[gregMonth];
-    this.popup.querySelector('.ethcal-greg-year').textContent = gregYear;
+    const firstMonth = firstEthDate.getMonth();
+    const firstYear = firstEthDate.getFullYear();
+    const lastMonth = lastEthDate.getMonth();
+    const lastYear = lastEthDate.getFullYear();
     
-    // Render days
+    // Update header to show the month range
+    let headerText = '';
+    if (firstMonth === lastMonth && firstYear === lastYear) {
+      headerText = monthNames[firstMonth];
+    } else if (firstYear === lastYear) {
+      headerText = `${monthNames[firstMonth]}-${monthNames[lastMonth]}`;
+    } else {
+      headerText = `${monthNames[firstMonth]} ${firstYear} - ${monthNames[lastMonth]} ${lastYear}`;
+    }
+    
+    this.popup.querySelector('.ethcal-greg-month-name').textContent = headerText;
+    this.popup.querySelector('.ethcal-greg-year').textContent = firstYear === lastYear ? firstYear : '';
+    
+    // Render days synchronized with Ethiopian calendar
     const daysContainer = this.popup.querySelector('.ethcal-greg-days');
     daysContainer.innerHTML = '';
     
-    const firstDay = new Date(gregYear, gregMonth, 1).getDay();
-    const daysInMonth = new Date(gregYear, gregMonth + 1, 0).getDate();
+    // Get the first day of the Ethiopian month to know how many empty cells to add
+    const firstDayOfWeek = this.calendar.getDayOfWeek(year, month, 1);
     
-    // Add empty cells
-    for (let i = 0; i < firstDay; i++) {
+    // Add empty cells to align with Ethiopian calendar
+    for (let i = 0; i < firstDayOfWeek; i++) {
       const emptyCell = document.createElement('div');
       emptyCell.className = 'ethcal-day ethcal-empty';
       daysContainer.appendChild(emptyCell);
     }
     
-    // Add days
+    // Add Gregorian dates corresponding to each Ethiopian date
     const todayGreg = new Date();
-    for (let d = 1; d <= daysInMonth; d++) {
+    for (let ethDay = 1; ethDay <= daysInEthMonth; ethDay++) {
+      const gregDate = this.calendar.toGregorian(year, month, ethDay);
+      const gregDay = gregDate.getDate();
+      const gregMonth = gregDate.getMonth();
+      const gregYear = gregDate.getFullYear();
+      
       const dayCell = document.createElement('div');
       dayCell.className = 'ethcal-day ethcal-greg-day';
-      dayCell.textContent = d;
-      dayCell.dataset.day = d;
+      dayCell.textContent = gregDay;
+      dayCell.dataset.day = gregDay;
       dayCell.dataset.month = gregMonth;
       dayCell.dataset.year = gregYear;
+      dayCell.dataset.ethDay = ethDay;
+      dayCell.dataset.ethMonth = month;
+      dayCell.dataset.ethYear = year;
       
       // Highlight today
       if (gregYear === todayGreg.getFullYear() && 
           gregMonth === todayGreg.getMonth() && 
-          d === todayGreg.getDate()) {
+          gregDay === todayGreg.getDate()) {
         dayCell.classList.add('ethcal-today-highlight');
       }
       
-      // Highlight if this Gregorian date corresponds to the selected Ethiopian date
-      if (this.selectedDate) {
-        const selectedGreg = this.calendar.toGregorian(
-          this.selectedDate.year, 
-          this.selectedDate.month, 
-          this.selectedDate.day
-        );
-        if (gregYear === selectedGreg.getFullYear() && 
-            gregMonth === selectedGreg.getMonth() && 
-            d === selectedGreg.getDate()) {
-          dayCell.classList.add('ethcal-selected');
-        }
+      // Highlight if this corresponds to the selected Ethiopian date
+      if (this.selectedDate && 
+          year === this.selectedDate.year && 
+          month === this.selectedDate.month && 
+          ethDay === this.selectedDate.day) {
+        dayCell.classList.add('ethcal-selected');
       }
       
       daysContainer.appendChild(dayCell);
