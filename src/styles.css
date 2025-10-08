@@ -264,3 +264,50 @@
   background: rgba(255, 243, 205, 0.9);
 }
 
+/* Gregorian calendar styles */
+.ethcal-greg-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.ethcal-greg-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.ethcal-greg-day:hover {
+  background: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.ethcal-greg-day.ethcal-today-highlight {
+  background: #fff3cd;
+  border-color: #ffc107;
+  font-weight: 600;
+}
+
+.ethcal-greg-day.ethcal-selected {
+  background: #2196f3;
+  color: white;
+  font-weight: 600;
+}
+
+.ethcal-greg-month-name {
+  color: #333;
+  font-size: 16px;
+}
+
+.ethcal-greg-year {
+  color: #666;
+  font-size: 14px;
+}
+
