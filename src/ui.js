@@ -76,10 +76,11 @@ class EthiopianCalendarUI {
     if (this.options.mergedView) {
       const isPrimaryEthiopian = this.options.primaryCalendar === 'ethiopian';
       // Determine button labels based on primary calendar
-      const yearPrevLabel = isPrimaryEthiopian ? '<አ' : '<Y';
-      const monthPrevLabel = isPrimaryEthiopian ? '<ወ' : '<M';
-      const monthNextLabel = isPrimaryEthiopian ? 'ወ>' : 'M>';
-      const yearNextLabel = isPrimaryEthiopian ? 'አ>' : 'Y>';
+      // Use HTML entities to avoid parsing issues with < and >
+      const yearPrevLabel = isPrimaryEthiopian ? '&lt;አ' : '&lt;Y';
+      const monthPrevLabel = isPrimaryEthiopian ? '&lt;ወ' : '&lt;M';
+      const monthNextLabel = isPrimaryEthiopian ? 'ወ&gt;' : 'M&gt;';
+      const yearNextLabel = isPrimaryEthiopian ? 'አ&gt;' : 'Y&gt;';
       
       popup.innerHTML = `
         <div class="ethcal-calendars ethcal-merged">
@@ -114,14 +115,14 @@ class EthiopianCalendarUI {
         <div class="ethcal-calendars">
           <div class="ethcal-calendar ethcal-ethiopian">
             <div class="ethcal-header">
-              <button class="ethcal-prev-year" aria-label="Previous Year"><አ</button>
-              <button class="ethcal-prev-month" aria-label="Previous Month"><ወ</button>
+              <button class="ethcal-prev-year" aria-label="Previous Year">&lt;አ</button>
+              <button class="ethcal-prev-month" aria-label="Previous Month">&lt;ወ</button>
               <div class="ethcal-current">
                 <span class="ethcal-month-name"></span>
                 <span class="ethcal-year"></span>
               </div>
-              <button class="ethcal-next-month" aria-label="Next Month">ወ></button>
-              <button class="ethcal-next-year" aria-label="Next Year">አ></button>
+              <button class="ethcal-next-month" aria-label="Next Month">ወ&gt;</button>
+              <button class="ethcal-next-year" aria-label="Next Year">አ&gt;</button>
             </div>
             <div class="ethcal-weekdays">${dayNamesHtml}</div>
             <div class="ethcal-days"></div>
@@ -129,14 +130,14 @@ class EthiopianCalendarUI {
           ${this.options.showGregorian ? `
           <div class="ethcal-calendar ethcal-gregorian">
             <div class="ethcal-header">
-              <button class="ethcal-greg-prev-year" aria-label="Previous Year"><Y</button>
-              <button class="ethcal-greg-prev-month" aria-label="Previous Month"><M</button>
+              <button class="ethcal-greg-prev-year" aria-label="Previous Year">&lt;Y</button>
+              <button class="ethcal-greg-prev-month" aria-label="Previous Month">&lt;M</button>
               <div class="ethcal-current">
                 <span class="ethcal-greg-month-name"></span>
                 <span class="ethcal-greg-year"></span>
               </div>
-              <button class="ethcal-greg-next-month" aria-label="Next Month">M></button>
-              <button class="ethcal-greg-next-year" aria-label="Next Year">Y></button>
+              <button class="ethcal-greg-next-month" aria-label="Next Month">M&gt;</button>
+              <button class="ethcal-greg-next-year" aria-label="Next Year">Y&gt;</button>
             </div>
             <div class="ethcal-weekdays">
               <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
@@ -187,6 +188,7 @@ class EthiopianCalendarUI {
       const monthNextLabel = isPrimaryEthiopian ? 'ወ>' : 'M>';
       const yearNextLabel = isPrimaryEthiopian ? 'አ>' : 'Y>';
       
+      // Use textContent (not innerHTML) to safely set text without HTML parsing
       this.popup.querySelector('.ethcal-prev-year').textContent = yearPrevLabel;
       this.popup.querySelector('.ethcal-prev-month').textContent = monthPrevLabel;
       this.popup.querySelector('.ethcal-next-month').textContent = monthNextLabel;
