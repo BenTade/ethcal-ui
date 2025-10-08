@@ -358,7 +358,7 @@ class EthiopianCalendarUI {
    */
   renderGregorianCalendar() {
     const { year, month } = this.currentEthDate;
-    const gregDate = this.calendar.toGregorian(year, month, 1); // Use first day of month
+    const gregDate = this.calendar.toGregorian(year, month, 15); // Use middle of month for consistency with navigation
     const gregYear = gregDate.getFullYear();
     const gregMonth = gregDate.getMonth();
     
@@ -524,7 +524,7 @@ class EthiopianCalendarUI {
       }
     } else {
       // Gregorian is primary
-      const gregDate = this.calendar.toGregorian(year, month, 1);
+      const gregDate = this.calendar.toGregorian(year, month, 15); // Use middle of month for consistency with navigation
       const gregYear = gregDate.getFullYear();
       const gregMonth = gregDate.getMonth();
       
