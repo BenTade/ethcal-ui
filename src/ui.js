@@ -360,7 +360,11 @@ class EthiopianCalendarUI {
    */
   renderGregorianCalendar() {
     const { year, month } = this.currentEthDate;
-    const gregDate = this.calendar.toGregorian(year, month, 1); // Use first day of month
+    // Use selected date if available, otherwise use current date, or fall back to middle of month
+    const day = (this.selectedDate && this.selectedDate.year === year && this.selectedDate.month === month) 
+      ? this.selectedDate.day 
+      : (this.currentEthDate.day || 15);
+    const gregDate = this.calendar.toGregorian(year, month, day);
     const gregYear = gregDate.getFullYear();
     const gregMonth = gregDate.getMonth();
     
