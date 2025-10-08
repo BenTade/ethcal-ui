@@ -360,7 +360,9 @@ class EthiopianCalendarUI {
    */
   renderGregorianCalendar() {
     const { year, month } = this.currentEthDate;
-    const gregDate = this.calendar.toGregorian(year, month, 1); // Use first day of month
+    // Use the middle day (day 15) to determine which Gregorian month to show
+    // This ensures we show the month that contains most of the Ethiopian month's days
+    const gregDate = this.calendar.toGregorian(year, month, 15);
     const gregYear = gregDate.getFullYear();
     const gregMonth = gregDate.getMonth();
     
