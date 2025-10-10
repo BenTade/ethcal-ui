@@ -97,9 +97,27 @@
     }
     ?>
 
+    <h2>Additional Examples</h2>
+    
+    <div style="margin: 30px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <h3>With Ethiopic Numerals</h3>
+        <input type="text" id="date_ethiopic" class="demo-input" placeholder="Select date" readonly style="width: 100%; max-width: 400px; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+
+    <div style="margin: 30px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <h3>With English Names</h3>
+        <input type="text" id="date_english" class="demo-input" placeholder="Select date" readonly style="width: 100%; max-width: 400px; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+
+    <div style="margin: 30px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <h3>Merged View (Both Calendars in One)</h3>
+        <input type="text" id="date_merged" class="demo-input" placeholder="Select date" readonly style="width: 100%; max-width: 400px; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
+
     <script type="module">
         import { EthiopianCalendarUI } from '../dist/ethcal-ui.esm.js';
 
+        // Main form calendar
         const dateInput = document.getElementById('birthdate');
         const gregorianInput = document.getElementById('birthdate_gregorian');
 
@@ -119,6 +137,52 @@
 
         dateInput.addEventListener('click', () => {
             calendar.show();
+        });
+
+        // Example with Ethiopic numerals
+        const dateEthiopicInput = document.getElementById('date_ethiopic');
+        const calendarEthiopic = new EthiopianCalendarUI({
+            inputElement: dateEthiopicInput,
+            useEthiopicNumbers: true,
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                dateEthiopicInput.value = `${eth.day}/${eth.month}/${eth.year}`;
+            }
+        });
+
+        dateEthiopicInput.addEventListener('click', () => {
+            calendarEthiopic.show();
+        });
+
+        // Example with English names
+        const dateEnglishInput = document.getElementById('date_english');
+        const calendarEnglish = new EthiopianCalendarUI({
+            inputElement: dateEnglishInput,
+            useAmharic: false,
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                dateEnglishInput.value = `${eth.day}/${eth.month}/${eth.year}`;
+            }
+        });
+
+        dateEnglishInput.addEventListener('click', () => {
+            calendarEnglish.show();
+        });
+
+        // Example with merged view
+        const dateMergedInput = document.getElementById('date_merged');
+        const calendarMerged = new EthiopianCalendarUI({
+            inputElement: dateMergedInput,
+            mergedView: true,
+            primaryCalendar: 'ethiopian',
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                dateMergedInput.value = `${eth.day}/${eth.month}/${eth.year}`;
+            }
+        });
+
+        dateMergedInput.addEventListener('click', () => {
+            calendarMerged.show();
         });
     </script>
 </body>

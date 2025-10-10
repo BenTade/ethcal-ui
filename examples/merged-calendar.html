@@ -93,6 +93,27 @@
         <div id="result3" class="result"></div>
     </div>
 
+    <div class="demo-section">
+        <h2>Example 4: Merged View with Ethiopic Numerals</h2>
+        <p>Merged calendar displaying dates using Ethiopic numerals (፩, ፪, ፫...):</p>
+        <input type="text" id="dateInput4" class="demo-input" placeholder="Select a date" readonly>
+        <div id="result4" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Example 5: Merged View with English Names</h2>
+        <p>Merged calendar displaying month and day names in English:</p>
+        <input type="text" id="dateInput5" class="demo-input" placeholder="Select a date" readonly>
+        <div id="result5" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Example 6: Merged View with Initial Date</h2>
+        <p>Merged calendar opening at Ethiopian New Year 2017:</p>
+        <input type="text" id="dateInput6" class="demo-input" placeholder="Select a date" readonly>
+        <div id="result6" class="result"></div>
+    </div>
+
     <script type="module">
         import { EthiopianCalendar, EthiopianCalendarUI } from '../dist/ethcal-ui.esm.js';
 
@@ -162,6 +183,79 @@
 
         showCalendarBtn.addEventListener('click', () => {
             calendar3.show();
+        });
+
+        // Example 4: Merged view with Ethiopic numerals
+        const dateInput4 = document.getElementById('dateInput4');
+        const result4 = document.getElementById('result4');
+        
+        const calendar4 = new EthiopianCalendarUI({
+            inputElement: dateInput4,
+            mergedView: true,
+            primaryCalendar: 'ethiopian',
+            useEthiopicNumbers: true,  // Use Ethiopic numerals
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result4.innerHTML = `
+                    <strong>Selected Date:</strong><br>
+                    Ethiopian: ${eth.day}/${eth.month}/${eth.year}<br>
+                    Gregorian: ${greg.toLocaleDateString()}
+                `;
+            }
+        });
+
+        dateInput4.addEventListener('click', () => {
+            calendar4.show();
+        });
+
+        // Example 5: Merged view with English names
+        const dateInput5 = document.getElementById('dateInput5');
+        const result5 = document.getElementById('result5');
+        
+        const calendar5 = new EthiopianCalendarUI({
+            inputElement: dateInput5,
+            mergedView: true,
+            primaryCalendar: 'ethiopian',
+            useAmharic: false,  // Use English names
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result5.innerHTML = `
+                    <strong>Selected Date:</strong><br>
+                    Ethiopian: ${eth.day}/${eth.month}/${eth.year}<br>
+                    Gregorian: ${greg.toLocaleDateString()}
+                `;
+            }
+        });
+
+        dateInput5.addEventListener('click', () => {
+            calendar5.show();
+        });
+
+        // Example 6: Merged view with initial date (Ethiopian New Year 2017)
+        const dateInput6 = document.getElementById('dateInput6');
+        const result6 = document.getElementById('result6');
+        const ethiopianNewYear2017 = new Date(2024, 8, 11); // Sept 11, 2024 = Meskerem 1, 2017
+        
+        const calendar6 = new EthiopianCalendarUI({
+            inputElement: dateInput6,
+            mergedView: true,
+            primaryCalendar: 'ethiopian',
+            initialDate: ethiopianNewYear2017,  // Set initial date
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result6.innerHTML = `
+                    <strong>Selected Date:</strong><br>
+                    Ethiopian: ${eth.day}/${eth.month}/${eth.year}<br>
+                    Gregorian: ${greg.toLocaleDateString()}
+                `;
+            }
+        });
+
+        dateInput6.addEventListener('click', () => {
+            calendar6.show();
         });
 
         // Show today's date

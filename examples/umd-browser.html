@@ -38,9 +38,21 @@
     <p>This example uses the UMD build directly in the browser without any build tools.</p>
     
     <div class="date-picker">
-        <label for="dateInput">Select Date:</label><br>
+        <label for="dateInput">Basic Calendar:</label><br>
         <input type="text" id="dateInput" placeholder="Click to select date" readonly>
         <div id="result" class="result"></div>
+    </div>
+
+    <div class="date-picker">
+        <label for="dateInput2">Ethiopic Numerals:</label><br>
+        <input type="text" id="dateInput2" placeholder="Click to select date" readonly>
+        <div id="result2" class="result"></div>
+    </div>
+
+    <div class="date-picker">
+        <label for="dateInput3">Merged View:</label><br>
+        <input type="text" id="dateInput3" placeholder="Click to select date" readonly>
+        <div id="result3" class="result"></div>
     </div>
 
     <!-- Load the UMD bundle -->
@@ -67,6 +79,49 @@
 
         dateInput.addEventListener('click', function() {
             calendar.show();
+        });
+
+        // Example 2: Ethiopic numerals
+        const dateInput2 = document.getElementById('dateInput2');
+        const result2 = document.getElementById('result2');
+        
+        const calendar2 = new EthiopianCalendarUI({
+            inputElement: dateInput2,
+            useEthiopicNumbers: true,
+            onSelect: function(date) {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result2.innerHTML = 
+                    '<strong>Selected Date:</strong><br>' +
+                    'Ethiopian: ' + eth.day + '/' + eth.month + '/' + eth.year + '<br>' +
+                    'Gregorian: ' + greg.toLocaleDateString();
+            }
+        });
+
+        dateInput2.addEventListener('click', function() {
+            calendar2.show();
+        });
+
+        // Example 3: Merged view
+        const dateInput3 = document.getElementById('dateInput3');
+        const result3 = document.getElementById('result3');
+        
+        const calendar3 = new EthiopianCalendarUI({
+            inputElement: dateInput3,
+            mergedView: true,
+            primaryCalendar: 'ethiopian',
+            onSelect: function(date) {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result3.innerHTML = 
+                    '<strong>Selected Date:</strong><br>' +
+                    'Ethiopian: ' + eth.day + '/' + eth.month + '/' + eth.year + '<br>' +
+                    'Gregorian: ' + greg.toLocaleDateString();
+            }
+        });
+
+        dateInput3.addEventListener('click', function() {
+            calendar3.show();
         });
 
         // Show today's date

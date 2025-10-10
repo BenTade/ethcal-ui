@@ -18,6 +18,31 @@ const props = defineProps({
   placeholder: {
     type: String,
     default: 'Select date'
+  },
+  initialDate: {
+    type: Date,
+    default: undefined
+  },
+  showGregorian: {
+    type: Boolean,
+    default: true
+  },
+  useAmharic: {
+    type: Boolean,
+    default: true
+  },
+  useEthiopicNumbers: {
+    type: Boolean,
+    default: false
+  },
+  mergedView: {
+    type: Boolean,
+    default: false
+  },
+  primaryCalendar: {
+    type: String,
+    default: 'ethiopian',
+    validator: (value) => ['ethiopian', 'gregorian'].includes(value)
   }
 });
 
@@ -30,6 +55,12 @@ let calendar = null;
 onMounted(() => {
   calendar = new EthiopianCalendarUI({
     inputElement: inputRef.value,
+    initialDate: props.initialDate,
+    showGregorian: props.showGregorian,
+    useAmharic: props.useAmharic,
+    useEthiopicNumbers: props.useEthiopicNumbers,
+    mergedView: props.mergedView,
+    primaryCalendar: props.primaryCalendar,
     onSelect: (date) => {
       const eth = date.ethiopian;
       selectedDate.value = `${eth.day}/${eth.month}/${eth.year}`;
@@ -64,7 +95,34 @@ Example usage in a Vue app:
 <template>
   <div>
     <h1>Ethiopian Calendar</h1>
+    
+    <!-- Basic usage -->
     <EthiopianDatePicker @select="handleDateSelect" />
+    
+    <!-- With Ethiopic numerals -->
+    <EthiopianDatePicker 
+      @select="handleDateSelect" 
+      :useEthiopicNumbers="true"
+    />
+    
+    <!-- Merged view with Gregorian as primary -->
+    <EthiopianDatePicker 
+      @select="handleDateSelect" 
+      :mergedView="true"
+      primaryCalendar="gregorian"
+    />
+    
+    <!-- With initial date (Ethiopian New Year 2017) -->
+    <EthiopianDatePicker 
+      @select="handleDateSelect" 
+      :initialDate="new Date(2024, 8, 11)"
+    />
+    
+    <!-- English names -->
+    <EthiopianDatePicker 
+      @select="handleDateSelect" 
+      :useAmharic="false"
+    />
   </div>
 </template>
 
