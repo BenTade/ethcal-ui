@@ -7,13 +7,19 @@
  * for server-side date handling in PHP applications.
  * 
  * This implementation uses the andegna/calender package for accurate
- * Ethiopian calendar calculations.
+ * Ethiopian calendar calculations and exposes all its functionalities.
  */
 
 // Check if composer autoload exists
 if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../vendor/autoload.php';
 }
+
+use Andegna\DateTime as AndegnaDateTime;
+use Andegna\DateTimeFactory;
+use Andegna\Validator\DateValidator;
+use Andegna\Validator\LeapYearValidator;
+use Andegna\Holiday\Easter;
 
 class EthiopianCalendar {
     
@@ -35,108 +41,27 @@ class EthiopianCalendar {
             $gregorianDate = new DateTime($gregorianDate);
         }
         
-        // Use andegna/calender for conversion if available
-        if (class_exists('Andegna\DateTime')) {
-            $ethiopic = new Andegna\DateTime($gregorianDate);
-            return [
-                'year' => $ethiopic->getYear(),
-                'month' => $ethiopic->getMonth(),
-                'day' => $ethiopic->getDay()
-            ];
-        }
-        
-        // Fallback to original implementation if andegna/calender is not available
-        return $this->toEthiopianFallback($gregorianDate);
-    }
-
-    /**
-     * Fallback conversion method (original implementation)
-     * 
-     * @param DateTime $gregorianDate DateTime object
-     * @return array Ethiopian date ['year' => int, 'month' => int, 'day' => int]
-     */
-    private function toEthiopianFallback($gregorianDate) {
-        $year = (int)$gregorianDate->format('Y');
-        $month = (int)$gregorianDate->format('m');
-        $date = (int)$gregorianDate->format('d');
-        
-        // Validate input
-        if ($month === 10 && $date >= 5 && $date <= 14 && $year === 1582) {
-            throw new Exception('Invalid Date between 5-14 May 1582.');
-        }
-        
-        // Number of days in gregorian months starting with January (index 1)
-        $gregorianMonths = [0.0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        
-        // Number of days in ethiopian months starting with January (index 1)
-        $ethiopianMonths = [0.0, 30, 30, 30, 30, 30, 30, 30, 30, 30, 5, 30, 30, 30, 30];
-        
-        // if gregorian leap year, February has 29 days
-        if (($year % 4 === 0 && $year % 100 !== 0) || $year % 400 === 0) {
-            $gregorianMonths[2] = 29;
-        }
-        
-        // September sees 8y difference
-        $ethiopianYear = $year - 8;
-        
-        // if ethiopian leap year pagumain has 6 days
-        if ($ethiopianYear % 4 === 3) {
-            $ethiopianMonths[10] = 6;
-        }
-        
-        // Helper function for Ethiopian new year day
-        $newYearDay = floor(($year - 8) / 100) - floor(($year - 8) / 400) - 4;
-        if ((($year - 8 - 1) % 4 === 3)) {
-            $newYearDay += 1;
-        }
-        
-        // calculate number of days up to that date
-        $until = 0;
-        for ($i = 1; $i < $month; $i++) {
-            $until += $gregorianMonths[$i];
-        }
-        $until += $date;
-        
-        // update tahissas (december) to match january 1st
-        $tahissas = ($ethiopianYear % 4) === 0 ? 26 : 25;
-        
-        // take into account the 1582 change
-        if ($year < 1582) {
-            $ethiopianMonths[1] = 0;
-            $ethiopianMonths[2] = $tahissas;
-        } else if ($until <= 277 && $year === 1582) {
-            $ethiopianMonths[1] = 0;
-            $ethiopianMonths[2] = $tahissas;
-        } else {
-            $tahissas = $newYearDay - 3;
-            $ethiopianMonths[1] = $tahissas;
-        }
-        
-        // calculate month and date incremently
-        $ethiopianDate = 0;
-        for ($m = 1; $m < count($ethiopianMonths); $m++) {
-            if ($until <= $ethiopianMonths[$m]) {
-                $ethiopianDate = ($m === 1 || $ethiopianMonths[$m] === 0) ? $until + (30 - $tahissas) : $until;
-                break;
-            } else {
-                $until -= $ethiopianMonths[$m];
-            }
-        }
-        
-        // if m > 10, we're already on next Ethiopian year
-        if ($m > 10) {
-            $ethiopianYear += 1;
-        }
-        
-        // Ethiopian months ordered according to Gregorian
-        $order = [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 2, 3, 4];
-        $ethiopianMonth = $order[$m];
-        
+        $ethiopic = new AndegnaDateTime($gregorianDate);
         return [
-            'year' => $ethiopianYear,
-            'month' => $ethiopianMonth,
-            'day' => $ethiopianDate
+            'year' => $ethiopic->getYear(),
+            'month' => $ethiopic->getMonth(),
+            'day' => $ethiopic->getDay()
         ];
+    }
+    
+    /**
+     * Convert Gregorian date to Ethiopian date and return Andegna\DateTime object
+     * This exposes the full functionality of andegna/calender
+     * 
+     * @param DateTime|string $gregorianDate DateTime object or date string
+     * @return AndegnaDateTime Ethiopian DateTime object with full andegna functionality
+     */
+    public function toEthiopianDateTime($gregorianDate) {
+        if (is_string($gregorianDate)) {
+            $gregorianDate = new DateTime($gregorianDate);
+        }
+        
+        return new AndegnaDateTime($gregorianDate);
     }
 
     /**
@@ -145,92 +70,16 @@ class EthiopianCalendar {
      * @param int $year Ethiopian year
      * @param int $month Ethiopian month (1-13)
      * @param int $day Ethiopian day
+     * @param int $hour Hour (0-23), default 0
+     * @param int $minute Minute (0-59), default 0
+     * @param int $second Second (0-59), default 0
+     * @param DateTimeZone|null $timezone Timezone, default system timezone
      * @return DateTime Gregorian DateTime object
+     * @throws Exception If the date is invalid
      */
-    public function toGregorian($year, $month, $day) {
-        // Use andegna/calender for conversion if available
-        if (class_exists('Andegna\DateTimeFactory')) {
-            try {
-                $ethiopic = Andegna\DateTimeFactory::of($year, $month, $day);
-                return $ethiopic->toGregorian();
-            } catch (Exception $e) {
-                // If andegna fails (e.g., invalid date), use fallback
-                return $this->toGregorianFallback($year, $month, $day);
-            }
-        }
-        
-        // Fallback to original implementation if andegna/calender is not available
-        return $this->toGregorianFallback($year, $month, $day);
-    }
-
-    /**
-     * Fallback conversion method (original implementation)
-     * 
-     * @param int $year Ethiopian year
-     * @param int $month Ethiopian month (1-13)
-     * @param int $day Ethiopian day
-     * @return DateTime Gregorian DateTime object
-     */
-    private function toGregorianFallback($year, $month, $day) {
-        // Helper function for Ethiopian new year day
-        $newYearDay = floor($year / 100) - floor($year / 400) - 4;
-        if ((($year - 1) % 4 === 3)) {
-            $newYearDay += 1;
-        }
-        
-        // September (Ethiopian) sees 7y difference
-        $gregorianYear = $year + 7;
-        
-        // Number of days in gregorian months
-        // starting with September (index 1)
-        // Index 0 is reserved for leap years switches.
-        // Index 4 is December, the final month of the year.
-        $gregorianMonths = [0.0, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30];
-        
-        // if next gregorian year is leap year, February has 29 days.
-        $nextYear = $gregorianYear + 1;
-        if (($nextYear % 4 === 0 && $nextYear % 100 !== 0) || $nextYear % 400 === 0) {
-            $gregorianMonths[6] = 29;
-        }
-        
-        // calculate number of days up to that date
-        $until = (($month - 1) * 30.0) + $day;
-        if ($until <= 37 && $year <= 1575) { // mysterious rule
-            $until += 28;
-            $gregorianMonths[0] = 31;
-        } else {
-            $until += $newYearDay - 1;
-        }
-        
-        // if ethiopian year is leap year, paguemain has six days
-        if (($year - 1) % 4 === 3) {
-            $until += 1;
-        }
-        
-        // calculate month and date incremently
-        $m = 0;
-        $gregorianDate = 0;
-        for ($i = 0; $i < count($gregorianMonths); $i++) {
-            if ($until <= $gregorianMonths[$i]) {
-                $m = $i;
-                $gregorianDate = $until;
-                break;
-            } else {
-                $m = $i;
-                $until -= $gregorianMonths[$i];
-            }
-        }
-        
-        // if m > 4, we're already on next Gregorian year
-        if ($m > 4) {
-            $gregorianYear += 1;
-        }
-        
-        // Gregorian months ordered according to Ethiopian
-        $order = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-        $gregorianMonth = $order[$m];
-        
-        return new DateTime(sprintf('%04d-%02d-%02d', $gregorianYear, $gregorianMonth, $gregorianDate));
+    public function toGregorian($year, $month, $day, $hour = 0, $minute = 0, $second = 0, $timezone = null) {
+        $ethiopic = DateTimeFactory::of($year, $month, $day, $hour, $minute, $second, $timezone);
+        return $ethiopic->toGregorian();
     }
 
     /**
@@ -241,11 +90,8 @@ class EthiopianCalendar {
      * @return int Number of days
      */
     public function getDaysInMonth($year, $month) {
-        if ($month < 13) {
-            return 30;
-        }
-        // Pagume has 5 days in common years, 6 in leap years
-        return $this->isLeapYear($year) ? 6 : 5;
+        $ethiopic = DateTimeFactory::of($year, $month, 1);
+        return $ethiopic->getDaysInMonth();
     }
 
     /**
@@ -255,7 +101,19 @@ class EthiopianCalendar {
      * @return bool True if leap year
      */
     public function isLeapYear($year) {
-        return ($year % 4) === 3;
+        return (new LeapYearValidator($year))->isValid();
+    }
+    
+    /**
+     * Validate an Ethiopian date
+     * 
+     * @param int $year Ethiopian year
+     * @param int $month Ethiopian month (1-13)
+     * @param int $day Ethiopian day
+     * @return bool True if valid date
+     */
+    public function isValidDate($year, $month, $day) {
+        return (new DateValidator($day, $month, $year))->isValid();
     }
 
     /**
@@ -281,14 +139,59 @@ class EthiopianCalendar {
     /**
      * Get current Ethiopian date
      * 
+     * @param DateTimeZone|null $timezone Timezone, default system timezone
      * @return array Ethiopian date ['year' => int, 'month' => int, 'day' => int]
      */
-    public function now() {
-        return $this->toEthiopian(new DateTime());
+    public function now($timezone = null) {
+        $ethiopic = DateTimeFactory::now($timezone);
+        return [
+            'year' => $ethiopic->getYear(),
+            'month' => $ethiopic->getMonth(),
+            'day' => $ethiopic->getDay()
+        ];
+    }
+    
+    /**
+     * Get current Ethiopian date as Andegna\DateTime object
+     * This exposes the full functionality of andegna/calender
+     * 
+     * @param DateTimeZone|null $timezone Timezone, default system timezone
+     * @return AndegnaDateTime Ethiopian DateTime object with full andegna functionality
+     */
+    public function nowDateTime($timezone = null) {
+        return DateTimeFactory::now($timezone);
+    }
+    
+    /**
+     * Create Ethiopian date from timestamp
+     * 
+     * @param int $timestamp Unix timestamp
+     * @param DateTimeZone|null $timezone Timezone, default system timezone
+     * @return array Ethiopian date ['year' => int, 'month' => int, 'day' => int]
+     */
+    public function fromTimestamp($timestamp, $timezone = null) {
+        $ethiopic = DateTimeFactory::fromTimestamp($timestamp, $timezone);
+        return [
+            'year' => $ethiopic->getYear(),
+            'month' => $ethiopic->getMonth(),
+            'day' => $ethiopic->getDay()
+        ];
+    }
+    
+    /**
+     * Create Ethiopian date from timestamp as Andegna\DateTime object
+     * This exposes the full functionality of andegna/calender
+     * 
+     * @param int $timestamp Unix timestamp
+     * @param DateTimeZone|null $timezone Timezone, default system timezone
+     * @return AndegnaDateTime Ethiopian DateTime object with full andegna functionality
+     */
+    public function fromTimestampDateTime($timestamp, $timezone = null) {
+        return DateTimeFactory::fromTimestamp($timestamp, $timezone);
     }
 
     /**
-     * Format Ethiopian date as string
+     * Format Ethiopian date as string (simple format for compatibility)
      * 
      * @param array $ethDate Ethiopian date array
      * @param string $format Format string (supports: d, m, y, M for month name)
@@ -318,15 +221,210 @@ class EthiopianCalendar {
         
         return $temp;
     }
+    
+    /**
+     * Format Ethiopian date using andegna/calender format patterns
+     * This supports all format patterns from andegna including Amharic formatting
+     * 
+     * @param array|AndegnaDateTime $ethDate Ethiopian date array or AndegnaDateTime object
+     * @param string $format PHP date format string (see andegna/calender documentation)
+     * @param DateTimeZone|null $timezone Timezone for the date
+     * @return string Formatted date
+     */
+    public function formatEthiopian($ethDate, $format, $timezone = null) {
+        if (is_array($ethDate)) {
+            $ethiopic = DateTimeFactory::of(
+                $ethDate['year'], 
+                $ethDate['month'], 
+                $ethDate['day'],
+                isset($ethDate['hour']) ? $ethDate['hour'] : 0,
+                isset($ethDate['minute']) ? $ethDate['minute'] : 0,
+                isset($ethDate['second']) ? $ethDate['second'] : 0,
+                $timezone
+            );
+        } else {
+            $ethiopic = $ethDate;
+        }
+        
+        return $ethiopic->format($format);
+    }
+    
+    /**
+     * Create Ethiopian DateTime object from date components
+     * 
+     * @param int $year Ethiopian year
+     * @param int $month Ethiopian month (1-13)
+     * @param int $day Ethiopian day
+     * @param int $hour Hour (0-23), default 0
+     * @param int $minute Minute (0-59), default 0
+     * @param int $second Second (0-59), default 0
+     * @param DateTimeZone|null $timezone Timezone, default system timezone
+     * @return AndegnaDateTime Ethiopian DateTime object with full andegna functionality
+     */
+    public function createEthiopianDateTime($year, $month, $day, $hour = 0, $minute = 0, $second = 0, $timezone = null) {
+        return DateTimeFactory::of($year, $month, $day, $hour, $minute, $second, $timezone);
+    }
+    
+    /**
+     * Get Easter date for a given Ethiopian year
+     * 
+     * @param int $year Ethiopian year
+     * @return AndegnaDateTime Easter date
+     */
+    public function getEaster($year) {
+        $easter = new Easter();
+        return $easter->get($year);
+    }
+    
+    /**
+     * Get Easter date as array for a given Ethiopian year
+     * 
+     * @param int $year Ethiopian year
+     * @return array Easter date ['year' => int, 'month' => int, 'day' => int]
+     */
+    public function getEasterAsArray($year) {
+        $easter = $this->getEaster($year);
+        return [
+            'year' => $easter->getYear(),
+            'month' => $easter->getMonth(),
+            'day' => $easter->getDay()
+        ];
+    }
+    
+    /**
+     * Manipulate an Ethiopian date
+     * 
+     * @param array|AndegnaDateTime $ethDate Ethiopian date array or AndegnaDateTime object
+     * @param string $modification Modification string (e.g., '+1 day', '-3 months')
+     * @param DateTimeZone|null $timezone Timezone for the date
+     * @return array Modified Ethiopian date ['year' => int, 'month' => int, 'day' => int]
+     */
+    public function modify($ethDate, $modification, $timezone = null) {
+        if (is_array($ethDate)) {
+            $ethiopic = DateTimeFactory::of(
+                $ethDate['year'], 
+                $ethDate['month'], 
+                $ethDate['day'],
+                isset($ethDate['hour']) ? $ethDate['hour'] : 0,
+                isset($ethDate['minute']) ? $ethDate['minute'] : 0,
+                isset($ethDate['second']) ? $ethDate['second'] : 0,
+                $timezone
+            );
+        } else {
+            $ethiopic = clone $ethDate;
+        }
+        
+        $ethiopic->modify($modification);
+        
+        return [
+            'year' => $ethiopic->getYear(),
+            'month' => $ethiopic->getMonth(),
+            'day' => $ethiopic->getDay()
+        ];
+    }
+    
+    /**
+     * Add interval to an Ethiopian date
+     * 
+     * @param array|AndegnaDateTime $ethDate Ethiopian date array or AndegnaDateTime object
+     * @param DateInterval $interval Date interval to add
+     * @param DateTimeZone|null $timezone Timezone for the date
+     * @return array Modified Ethiopian date ['year' => int, 'month' => int, 'day' => int]
+     */
+    public function add($ethDate, $interval, $timezone = null) {
+        if (is_array($ethDate)) {
+            $ethiopic = DateTimeFactory::of(
+                $ethDate['year'], 
+                $ethDate['month'], 
+                $ethDate['day'],
+                isset($ethDate['hour']) ? $ethDate['hour'] : 0,
+                isset($ethDate['minute']) ? $ethDate['minute'] : 0,
+                isset($ethDate['second']) ? $ethDate['second'] : 0,
+                $timezone
+            );
+        } else {
+            $ethiopic = clone $ethDate;
+        }
+        
+        $ethiopic->add($interval);
+        
+        return [
+            'year' => $ethiopic->getYear(),
+            'month' => $ethiopic->getMonth(),
+            'day' => $ethiopic->getDay()
+        ];
+    }
+    
+    /**
+     * Subtract interval from an Ethiopian date
+     * 
+     * @param array|AndegnaDateTime $ethDate Ethiopian date array or AndegnaDateTime object
+     * @param DateInterval $interval Date interval to subtract
+     * @param DateTimeZone|null $timezone Timezone for the date
+     * @return array Modified Ethiopian date ['year' => int, 'month' => int, 'day' => int]
+     */
+    public function sub($ethDate, $interval, $timezone = null) {
+        if (is_array($ethDate)) {
+            $ethiopic = DateTimeFactory::of(
+                $ethDate['year'], 
+                $ethDate['month'], 
+                $ethDate['day'],
+                isset($ethDate['hour']) ? $ethDate['hour'] : 0,
+                isset($ethDate['minute']) ? $ethDate['minute'] : 0,
+                isset($ethDate['second']) ? $ethDate['second'] : 0,
+                $timezone
+            );
+        } else {
+            $ethiopic = clone $ethDate;
+        }
+        
+        $ethiopic->sub($interval);
+        
+        return [
+            'year' => $ethiopic->getYear(),
+            'month' => $ethiopic->getMonth(),
+            'day' => $ethiopic->getDay()
+        ];
+    }
+    
+    /**
+     * Get day of year for an Ethiopian date
+     * 
+     * @param int $year Ethiopian year
+     * @param int $month Ethiopian month (1-13)
+     * @param int $day Ethiopian day
+     * @return int Day of year (1-366)
+     */
+    public function getDayOfYear($year, $month, $day) {
+        $ethiopic = DateTimeFactory::of($year, $month, $day);
+        return $ethiopic->getDayOfYear();
+    }
+    
+    /**
+     * Get day of week for an Ethiopian date
+     * 
+     * @param int $year Ethiopian year
+     * @param int $month Ethiopian month (1-13)
+     * @param int $day Ethiopian day
+     * @return int Day of week (1 for Monday through 7 for Sunday)
+     */
+    public function getDayOfWeek($year, $month, $day) {
+        $ethiopic = DateTimeFactory::of($year, $month, $day);
+        return $ethiopic->getDayOfWeek();
+    }
 }
 
 // Example usage:
 /*
 $calendar = new EthiopianCalendar();
 
-// Get today's Ethiopian date
+// Get today's Ethiopian date (as array)
 $today = $calendar->now();
 echo "Today: " . $calendar->format($today, 'd M y') . "\n";
+
+// Get today's Ethiopian date (as Andegna\DateTime object with full functionality)
+$todayDT = $calendar->nowDateTime();
+echo "Today (Amharic): " . $todayDT->format(\Andegna\Constants::DATE_ETHIOPIAN) . "\n";
 
 // Convert specific Gregorian date to Ethiopian
 $ethDate = $calendar->toEthiopian('2025-09-30');
@@ -335,4 +433,32 @@ echo "2025-09-30 in Ethiopian: " . $calendar->format($ethDate, 'd M y') . "\n";
 // Convert Ethiopian date to Gregorian
 $gregDate = $calendar->toGregorian(2017, 1, 20);
 echo "20/1/2017 in Gregorian: " . $gregDate->format('Y-m-d') . "\n";
+
+// Use andegna format patterns for Amharic output
+$ethDT = $calendar->toEthiopianDateTime('2024-09-11');
+echo "Formatted (Amharic): " . $calendar->formatEthiopian($ethDate, \Andegna\Constants::DATE_ETHIOPIAN) . "\n";
+
+// Validate Ethiopian date
+$isValid = $calendar->isValidDate(2017, 13, 6);
+echo "Is 6/13/2017 valid? " . ($isValid ? 'Yes' : 'No') . "\n";
+
+// Check leap year
+$isLeap = $calendar->isLeapYear(2015);
+echo "Is 2015 a leap year? " . ($isLeap ? 'Yes' : 'No') . "\n";
+
+// Get Easter date
+$easter = $calendar->getEasterAsArray(2017);
+echo "Easter 2017: " . $calendar->format($easter, 'd M y') . "\n";
+
+// Manipulate dates
+$modified = $calendar->modify($today, '+1 month');
+echo "Next month: " . $calendar->format($modified, 'd M y') . "\n";
+
+// Get day of year
+$dayOfYear = $calendar->getDayOfYear(2017, 1, 1);
+echo "Day of year for 1/1/2017: " . $dayOfYear . "\n";
+
+// Create from timestamp
+$fromTs = $calendar->fromTimestamp(time());
+echo "From timestamp: " . $calendar->format($fromTs, 'd M y') . "\n";
 */
