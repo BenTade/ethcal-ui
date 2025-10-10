@@ -67,11 +67,39 @@
     </div>
 
     <div class="demo-section">
-        <h2>Example 3: Date Conversion</h2>
+        <h2>Example 3: Side-by-Side Calendars (showGregorian)</h2>
+        <p>Display both Ethiopian and Gregorian calendars side by side:</p>
+        <input type="text" id="dateInput3" class="demo-input" placeholder="Select a date" readonly>
+        <div id="result3" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Example 4: Ethiopic Numerals (useEthiopicNumbers)</h2>
+        <p>Display dates using Ethiopic numerals (፩, ፪, ፫...):</p>
+        <input type="text" id="dateInput4" class="demo-input" placeholder="Select a date" readonly>
+        <div id="result4" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Example 5: English Names (useAmharic: false)</h2>
+        <p>Display month and day names in English:</p>
+        <input type="text" id="dateInput5" class="demo-input" placeholder="Select a date" readonly>
+        <div id="result5" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Example 6: Initial Date</h2>
+        <p>Calendar opens with a specific date (Ethiopian New Year 2017):</p>
+        <input type="text" id="dateInput6" class="demo-input" placeholder="Select a date" readonly>
+        <div id="result6" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Example 7: Date Conversion</h2>
         <p>Enter a Gregorian date to convert to Ethiopian:</p>
         <input type="date" id="gregDate" class="demo-input">
         <button id="convertBtn">Convert</button>
-        <div id="result3" class="result"></div>
+        <div id="result7" class="result"></div>
     </div>
 
     <script type="module">
@@ -118,10 +146,99 @@
             calendar2.show();
         });
 
-        // Example 3: Date conversion
+        // Example 3: Side-by-Side calendars
+        const dateInput3 = document.getElementById('dateInput3');
+        const result3 = document.getElementById('result3');
+        
+        const calendar3 = new EthiopianCalendarUI({
+            inputElement: dateInput3,
+            showGregorian: true,  // Show both calendars side by side
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result3.innerHTML = `
+                    <strong>Selected Date:</strong><br>
+                    Ethiopian: ${eth.day}/${eth.month}/${eth.year}<br>
+                    Gregorian: ${greg.toLocaleDateString()}
+                `;
+            }
+        });
+
+        dateInput3.addEventListener('click', () => {
+            calendar3.show();
+        });
+
+        // Example 4: Ethiopic numerals
+        const dateInput4 = document.getElementById('dateInput4');
+        const result4 = document.getElementById('result4');
+        
+        const calendar4 = new EthiopianCalendarUI({
+            inputElement: dateInput4,
+            useEthiopicNumbers: true,  // Use Ethiopic numerals
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result4.innerHTML = `
+                    <strong>Selected Date:</strong><br>
+                    Ethiopian: ${eth.day}/${eth.month}/${eth.year}<br>
+                    Gregorian: ${greg.toLocaleDateString()}
+                `;
+            }
+        });
+
+        dateInput4.addEventListener('click', () => {
+            calendar4.show();
+        });
+
+        // Example 5: English names
+        const dateInput5 = document.getElementById('dateInput5');
+        const result5 = document.getElementById('result5');
+        
+        const calendar5 = new EthiopianCalendarUI({
+            inputElement: dateInput5,
+            useAmharic: false,  // Use English names
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result5.innerHTML = `
+                    <strong>Selected Date:</strong><br>
+                    Ethiopian: ${eth.day}/${eth.month}/${eth.year}<br>
+                    Gregorian: ${greg.toLocaleDateString()}
+                `;
+            }
+        });
+
+        dateInput5.addEventListener('click', () => {
+            calendar5.show();
+        });
+
+        // Example 6: Initial date (Ethiopian New Year 2017)
+        const dateInput6 = document.getElementById('dateInput6');
+        const result6 = document.getElementById('result6');
+        const ethiopianNewYear2017 = new Date(2024, 8, 11); // Sept 11, 2024 = Meskerem 1, 2017
+        
+        const calendar6 = new EthiopianCalendarUI({
+            inputElement: dateInput6,
+            initialDate: ethiopianNewYear2017,  // Set initial date
+            onSelect: (date) => {
+                const eth = date.ethiopian;
+                const greg = date.gregorian;
+                result6.innerHTML = `
+                    <strong>Selected Date:</strong><br>
+                    Ethiopian: ${eth.day}/${eth.month}/${eth.year}<br>
+                    Gregorian: ${greg.toLocaleDateString()}
+                `;
+            }
+        });
+
+        dateInput6.addEventListener('click', () => {
+            calendar6.show();
+        });
+
+        // Example 7: Date conversion
         const gregDateInput = document.getElementById('gregDate');
         const convertBtn = document.getElementById('convertBtn');
-        const result3 = document.getElementById('result3');
+        const result7 = document.getElementById('result7');
         const converter = new EthiopianCalendar();
 
         // Set default to today
@@ -132,7 +249,7 @@
             if (gregDate) {
                 const ethDate = converter.toEthiopian(gregDate);
                 const monthName = converter.getMonthName(ethDate.month);
-                result3.innerHTML = `
+                result7.innerHTML = `
                     <strong>Conversion Result:</strong><br>
                     Gregorian: ${gregDate.toLocaleDateString()}<br>
                     Ethiopian: ${ethDate.day} ${monthName} ${ethDate.year}
