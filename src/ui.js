@@ -728,13 +728,17 @@ class EthiopianCalendarUI {
     });
     
     // Close on outside click
-    document.addEventListener('click', (e) => {
-      if (this.popup && 
-          !this.popup.contains(e.target) && 
-          e.target !== this.options.inputElement) {
-        this.hide();
-      }
-    });
+    // Use setTimeout to defer this check until after the current click event completes
+    // This prevents the popup from immediately closing when opened programmatically via a button click
+    setTimeout(() => {
+      document.addEventListener('click', (e) => {
+        if (this.popup && 
+            !this.popup.contains(e.target) && 
+            e.target !== this.options.inputElement) {
+          this.hide();
+        }
+      });
+    }, 0);
   }
 
   /**
