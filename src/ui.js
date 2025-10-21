@@ -21,6 +21,7 @@ class EthiopianCalendarUI {
     this.currentEthDate = this.calendar.toEthiopian(this.options.initialDate);
     this.selectedDate = null;
     this.popup = null;
+    this.justOpened = false;
   }
 
   /**
@@ -29,6 +30,11 @@ class EthiopianCalendarUI {
   show() {
     if (this.popup) {
       this.popup.style.display = 'block';
+      this.justOpened = true;
+      // Reset the flag after a short delay to allow the current click event to complete
+      setTimeout(() => {
+        this.justOpened = false;
+      }, 10);
       return;
     }
 
@@ -40,6 +46,12 @@ class EthiopianCalendarUI {
     
     this.render();
     this.attachEventListeners();
+    
+    // Set flag to prevent immediate closing
+    this.justOpened = true;
+    setTimeout(() => {
+      this.justOpened = false;
+    }, 10);
   }
 
   /**
@@ -734,7 +746,8 @@ class EthiopianCalendarUI {
       document.addEventListener('click', (e) => {
         if (this.popup && 
             !this.popup.contains(e.target) && 
-            e.target !== this.options.inputElement) {
+            e.target !== this.options.inputElement &&
+            !this.justOpened) {
           this.hide();
         }
       });
