@@ -387,9 +387,18 @@ The calendar comes with default styling, but you can customize it by overriding 
 
 MIT
 
+## Releases
+
+This project follows semantic versioning. See [RELEASING.md](RELEASING.md) for information about the release process.
+
+To publish a new release:
+```bash
+./scripts/publish-release.sh
+```
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## Credits
 
