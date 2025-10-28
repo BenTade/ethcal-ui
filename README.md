@@ -11,7 +11,7 @@ Ethiopian Calendar UI component - A beautiful, easy-to-use calendar popup for se
 - 🔀 **NEW: Merged calendar view** - Display both calendars in one grid with primary/secondary classification
 - 🚀 Works with vanilla JS, React, Vue, Angular, and PHP
 - 📦 Multiple module formats (ESM, CommonJS, UMD)
-- 🎯 Zero dependencies
+- 📚 Uses [ethcal-js](https://github.com/BenTade/ethcal-js) for accurate calendar calculations
 - 💪 TypeScript-ready
 
 ## Installation
@@ -403,3 +403,5 @@ Contributions are welcome! Please feel free to submit a Pull Request. See [CONTR
 ## Credits
 
 Based on the Ethiopian calendar system, which has 13 months with 12 months of 30 days and a 13th month (Pagume) of 5 or 6 days.
+
+Calendar calculations powered by [ethcal-js](https://github.com/BenTade/ethcal-js), which is based on [ethcal-go](https://github.com/BenTade/ethcal-go) and the original [andegna/calender](https://github.com/andegna/calender) PHP package.

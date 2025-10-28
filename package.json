@@ -52,6 +52,6 @@
     "rollup-plugin-postcss": "^4.0.2"
   },
   "dependencies": {
-    "ethcal": "file:../../../../../tmp/ethcal-js"
+    "ethcal": "github:BenTade/ethcal-js"
   }
 }
