@@ -2,35 +2,35 @@
  * Ethiopian Calendar Utility
  * Converts between Gregorian and Ethiopian calendars
  * Ethiopian calendar has 13 months (12 months of 30 days + 1 month of 5/6 days)
+ * 
+ * This class now uses the ethcal package for calendar calculations
  */
+
+import { DateTime, MONTH_NAMES, DAY_NAMES_LONG, GEEZ_NUMBERS } from 'ethcal';
 
 class EthiopianCalendar {
   constructor() {
+    // Month names in English
     this.monthNames = [
       'Meskerem', 'Tikimt', 'Hidar', 'Tahsas', 'Tir', 'Yekatit',
       'Megabit', 'Miazia', 'Ginbot', 'Sene', 'Hamle', 'Nehase', 'Pagume'
     ];
-
-    this.monthNamesAmharic = [
-      'መስከረም', 'ጥቅምት', 'ኅዳር', 'ታኅሣሥ', 'ጥር', 'የካቲት',
-      'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጳጉሜን'
-    ];
     
+    // Day names in English
     this.dayNames = ['Ehud', 'Segno', 'Maksegno', 'Erob', 'Hamus', 'Arb', 'Kidame'];
 
-    this.dayNamesAmharic = ['እሁድ', 'ሰኞ', 'ማክሰኞ', 'ረቡዕ', 'ሐሙስ', 'ዓርብ', 'ቅዳሜ'];
-  }
-
-  /**
-   * Helper function to calculate Ethiopian new year day
-   * @param {number} year - Ethiopian year
-   * @returns {number} New year day
-   * @private
-   */
-  _startDayOfEthiopian(year) {
-    const newYearDay = Math.floor(year / 100) - Math.floor(year / 400) - 4;
-    // if the prev ethiopian year is a leap year, new-year occurs on 12th
-    return ((year - 1) % 4 === 3) ? newYearDay + 1 : newYearDay;
+    // Day names in Amharic (from ethcal package, mapped to Sunday-first order)
+    // ethcal DAY_NAMES_LONG: ['', 'ሰኞ' (Mon), 'ማክሰኞ' (Tue), 'ረቡዕ' (Wed), 'ሐሙስ' (Thu), 'ዓርብ' (Fri), 'ቅዳሜ' (Sat), 'እሑድ' (Sun)]
+    // We need: [እሑድ (Sun), ሰኞ (Mon), ማክሰኞ (Tue), ረቡዕ (Wed), ሐሙስ (Thu), ዓርብ (Fri), ቅዳሜ (Sat)]
+    this.dayNamesAmharic = [
+      DAY_NAMES_LONG[7], // Sunday
+      DAY_NAMES_LONG[1], // Monday
+      DAY_NAMES_LONG[2], // Tuesday
+      DAY_NAMES_LONG[3], // Wednesday
+      DAY_NAMES_LONG[4], // Thursday
+      DAY_NAMES_LONG[5], // Friday
+      DAY_NAMES_LONG[6]  // Saturday
+    ];
   }
 
   /**
@@ -39,84 +39,11 @@ class EthiopianCalendar {
    * @returns {Object} Ethiopian date {year, month, day}
    */
   toEthiopian(gregorianDate) {
-    const year = gregorianDate.getFullYear();
-    const month = gregorianDate.getMonth() + 1;
-    const date = gregorianDate.getDate();
-    
-    // Validate input
-    if (month === 10 && date >= 5 && date <= 14 && year === 1582) {
-      throw new Error('Invalid Date between 5-14 May 1582.');
-    }
-    
-    // Number of days in gregorian months starting with January (index 1)
-    const gregorianMonths = [0.0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    
-    // Number of days in ethiopian months starting with January (index 1)
-    const ethiopianMonths = [0.0, 30, 30, 30, 30, 30, 30, 30, 30, 30, 5, 30, 30, 30, 30];
-    
-    // if gregorian leap year, February has 29 days
-    if ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) {
-      gregorianMonths[2] = 29;
-    }
-    
-    // September sees 8y difference
-    let ethiopianYear = year - 8;
-    
-    // if ethiopian leap year pagumain has 6 days
-    if (ethiopianYear % 4 === 3) {
-      ethiopianMonths[10] = 6;
-    }
-    
-    // Ethiopian new year in Gregorian calendar
-    const newYearDay = this._startDayOfEthiopian(year - 8);
-    
-    // calculate number of days up to that date
-    let until = 0;
-    for (let i = 1; i < month; i++) {
-      until += gregorianMonths[i];
-    }
-    until += date;
-    
-    // update tahissas (december) to match january 1st
-    let tahissas = (ethiopianYear % 4) === 0 ? 26 : 25;
-    
-    // take into account the 1582 change
-    if (year < 1582) {
-      ethiopianMonths[1] = 0;
-      ethiopianMonths[2] = tahissas;
-    } else if (until <= 277 && year === 1582) {
-      ethiopianMonths[1] = 0;
-      ethiopianMonths[2] = tahissas;
-    } else {
-      tahissas = newYearDay - 3;
-      ethiopianMonths[1] = tahissas;
-    }
-    
-    // calculate month and date incremently
-    let m;
-    let ethiopianDate;
-    for (m = 1; m < ethiopianMonths.length; m++) {
-      if (until <= ethiopianMonths[m]) {
-        ethiopianDate = (m === 1 || ethiopianMonths[m] === 0) ? until + (30 - tahissas) : until;
-        break;
-      } else {
-        until -= ethiopianMonths[m];
-      }
-    }
-    
-    // if m > 10, we're already on next Ethiopian year
-    if (m > 10) {
-      ethiopianYear += 1;
-    }
-    
-    // Ethiopian months ordered according to Gregorian
-    const order = [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 2, 3, 4];
-    const ethiopianMonth = order[m];
-    
+    const dt = new DateTime(gregorianDate);
     return {
-      year: ethiopianYear,
-      month: ethiopianMonth,
-      day: ethiopianDate
+      year: dt.getYear(),
+      month: dt.getMonth(),
+      day: dt.getDay()
     };
   }
 
@@ -128,62 +55,8 @@ class EthiopianCalendar {
    * @returns {Date} Gregorian date object
    */
   toGregorian(year, month, day) {
-    // Ethiopian new year in Gregorian calendar
-    const newYearDay = this._startDayOfEthiopian(year);
-    
-    // September (Ethiopian) sees 7y difference
-    let gregorianYear = year + 7;
-    
-    // Number of days in gregorian months
-    // starting with September (index 1)
-    // Index 0 is reserved for leap years switches.
-    // Index 4 is December, the final month of the year.
-    let gregorianMonths = [0.0, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30];
-    
-    // if next gregorian year is leap year, February has 29 days.
-    const nextYear = gregorianYear + 1;
-    if ((nextYear % 4 === 0 && nextYear % 100 !== 0) || nextYear % 400 === 0) {
-      gregorianMonths[6] = 29;
-    }
-    
-    // calculate number of days up to that date
-    let until = ((month - 1) * 30.0) + day;
-    if (until <= 37 && year <= 1575) { // mysterious rule
-      until += 28;
-      gregorianMonths[0] = 31;
-    } else {
-      until += newYearDay - 1;
-    }
-    
-    // if ethiopian year is leap year, paguemain has six days
-    if ((year - 1) % 4 === 3) {
-      until += 1;
-    }
-    
-    // calculate month and date incremently
-    let m = 0;
-    let gregorianDate;
-    for (let i = 0; i < gregorianMonths.length; i++) {
-      if (until <= gregorianMonths[i]) {
-        m = i;
-        gregorianDate = until;
-        break;
-      } else {
-        m = i;
-        until -= gregorianMonths[i];
-      }
-    }
-    
-    // if m > 4, we're already on next Gregorian year
-    if (m > 4) {
-      gregorianYear += 1;
-    }
-    
-    // Gregorian months ordered according to Ethiopian
-    const order = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    const gregorianMonth = order[m];
-    
-    return new Date(gregorianYear, gregorianMonth - 1, gregorianDate);
+    const dt = DateTime.of(year, month, day);
+    return dt.toGregorian();
   }
 
   /**
@@ -206,7 +79,8 @@ class EthiopianCalendar {
    * @returns {boolean} True if leap year
    */
   isLeapYear(year) {
-    return (year % 4) === 3;
+    // Ethiopian leap year rule: (year + 1) % 4 == 0
+    return ((year + 1) % 4) === 0;
   }
 
   /**
@@ -228,8 +102,12 @@ class EthiopianCalendar {
    * @returns {string} Month name
    */
   getMonthName(month, useAmharic = false) {
-    const names = useAmharic ? this.monthNamesAmharic : this.monthNames;
-    return names[month - 1] || '';
+    if (useAmharic) {
+      // MONTH_NAMES from ethcal is 1-indexed, so we can use month directly
+      return MONTH_NAMES[month] || '';
+    }
+    // English names are 0-indexed
+    return this.monthNames[month - 1] || '';
   }
 
   /**
@@ -251,6 +129,12 @@ class EthiopianCalendar {
   toEthiopicNumeral(num) {
     if (num === 0) return '0';
     
+    // Use GEEZ_NUMBERS from ethcal for 1-30
+    if (num >= 1 && num <= 30) {
+      return GEEZ_NUMBERS[num];
+    }
+    
+    // For numbers > 30, use the fallback logic
     const ethiopicNumerals = {
       1: '፩', 2: '፪', 3: '፫', 4: '፬', 5: '፭',
       6: '፮', 7: '፯', 8: '፰', 9: '፱', 10: '፲',
